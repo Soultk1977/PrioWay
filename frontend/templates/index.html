@@ -1,0 +1,10076 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    PrioWay Command Center
+</title>
+
+<link
+    rel="icon"
+    href="/static/images/prioway-icon.jpg"
+>
+
+<link
+    rel="stylesheet"
+    href="/static/vendor/leaflet/leaflet.css"
+>
+
+
+<style>
+
+/* =====================================================
+   PRIOWAY DESIGN SYSTEM
+===================================================== */
+
+:root {
+
+    --bg:
+        #06080c;
+
+    --bg-soft:
+        #0a0d13;
+
+    --panel:
+        rgba(18,22,31,.68);
+
+    --panel-strong:
+        rgba(17,21,30,.92);
+
+    --panel-hover:
+        rgba(27,32,43,.86);
+
+    --line:
+        rgba(255,255,255,.08);
+
+    --line-strong:
+        rgba(255,255,255,.15);
+
+    --text:
+        #f5f7fb;
+
+    --muted:
+        #9098a8;
+
+    --muted-dark:
+        #626b7b;
+
+    --red:
+        #ef1d28;
+
+    --red-bright:
+        #ff3540;
+
+    --red-soft:
+        rgba(239,29,40,.13);
+
+    --green:
+        #35d58a;
+
+    --green-soft:
+        rgba(53,213,138,.13);
+
+    --amber:
+        #ffb84d;
+
+    --amber-soft:
+        rgba(255,184,77,.13);
+
+    --purple:
+        #a985ff;
+
+    --purple-soft:
+        rgba(169,133,255,.13);
+
+    --cyan:
+        #46c9e8;
+
+    --cyan-soft:
+        rgba(70,201,232,.12);
+
+    --danger:
+        #ff4d5a;
+
+    --radius:
+        22px;
+
+    --small-radius:
+        13px;
+
+    --shadow:
+        0 24px 80px
+        rgba(0,0,0,.35);
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+* {
+
+    box-sizing:
+        border-box;
+
+}
+
+
+html,
+body {
+
+    margin:
+        0;
+
+    min-height:
+        100%;
+
+}
+
+
+body {
+
+    color:
+        var(--text);
+
+    background:
+
+        radial-gradient(
+            circle at 15% -5%,
+            rgba(239,29,40,.11),
+            transparent 28%
+        ),
+
+        radial-gradient(
+            circle at 100% 45%,
+            rgba(255,255,255,.035),
+            transparent 24%
+        ),
+
+        linear-gradient(
+            155deg,
+            #05070a,
+            #090c12 55%,
+            #050609
+        );
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    overflow-x:
+        hidden;
+
+}
+
+
+button,
+input,
+select {
+
+    font:
+        inherit;
+
+}
+
+
+button {
+
+    cursor:
+        pointer;
+
+}
+
+
+/* =====================================================
+   AMBIENT BACKGROUND
+===================================================== */
+
+.ambient {
+
+    position:
+        fixed;
+
+    width:
+        450px;
+
+    height:
+        450px;
+
+    border-radius:
+        50%;
+
+    filter:
+        blur(125px);
+
+    pointer-events:
+        none;
+
+    z-index:
+        0;
+
+}
+
+
+.ambient.one {
+
+    background:
+        #ef1d28;
+
+    opacity:
+        .17;
+
+    left:
+        -300px;
+
+    top:
+        20%;
+
+}
+
+
+.ambient.two {
+
+    background:
+        white;
+
+    opacity:
+        .035;
+
+    right:
+        -340px;
+
+    bottom:
+        10%;
+
+}
+
+
+/* =====================================================
+   GLASS
+===================================================== */
+
+.glass {
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(25,30,41,.78),
+            rgba(10,13,19,.58)
+        );
+
+    border:
+        1px solid
+        var(--line);
+
+    box-shadow:
+        var(--shadow);
+
+    backdrop-filter:
+        blur(22px);
+
+    -webkit-backdrop-filter:
+        blur(22px);
+
+}
+
+
+/* =====================================================
+   APP SHELL
+===================================================== */
+
+.app-shell {
+
+    position:
+        relative;
+
+    z-index:
+        1;
+
+    min-height:
+        100vh;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        250px
+        minmax(0,1fr);
+
+}
+
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.sidebar {
+
+    position:
+        sticky;
+
+    top:
+        0;
+
+    height:
+        100vh;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    padding:
+        20px 15px;
+
+    background:
+        rgba(5,7,10,.92);
+
+    border-right:
+        1px solid
+        var(--line);
+
+    backdrop-filter:
+        blur(25px);
+
+    z-index:
+        40;
+
+}
+
+
+.logo-wrap {
+
+    height:
+        76px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin-bottom:
+        8px;
+
+}
+
+
+.logo-wrap img {
+
+    width:
+        205px;
+
+    max-height:
+        72px;
+
+    object-fit:
+        contain;
+
+    filter:
+        drop-shadow(
+            0 12px 30px
+            rgba(0,0,0,.5)
+        );
+
+}
+
+
+.nav {
+
+    overflow-y:
+        auto;
+
+}
+
+
+.nav-title {
+
+    padding:
+        18px 12px 6px;
+
+    color:
+        var(--muted-dark);
+
+    font-size:
+        10px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .18em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.nav-item {
+
+    width:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        11px;
+
+    padding:
+        11px 12px;
+
+    margin-bottom:
+        4px;
+
+    color:
+        #aab2c1;
+
+    background:
+        transparent;
+
+    border:
+        1px solid
+        transparent;
+
+    border-radius:
+        13px;
+
+    text-align:
+        left;
+
+    font-weight:
+        700;
+
+    transition:
+        .18s ease;
+
+}
+
+
+.nav-item:hover {
+
+    color:
+        white;
+
+    background:
+        rgba(255,255,255,.045);
+
+}
+
+
+.nav-item.active {
+
+    color:
+        white;
+
+    border-color:
+        rgba(239,29,40,.26);
+
+    background:
+
+        linear-gradient(
+            90deg,
+            rgba(239,29,40,.18),
+            rgba(239,29,40,.035)
+        );
+
+    box-shadow:
+
+        inset
+        3px
+        0
+        0
+        var(--red);
+
+}
+
+
+.nav-icon {
+
+    width:
+        25px;
+
+    height:
+        25px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        8px;
+
+    background:
+        rgba(255,255,255,.04);
+
+    color:
+        white;
+
+    font-weight:
+        900;
+
+    font-size:
+        11px;
+
+}
+
+
+.nav-count {
+
+    margin-left:
+        auto;
+
+    min-width:
+        22px;
+
+    height:
+        22px;
+
+    padding:
+        0 6px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        999px;
+
+    background:
+        var(--red);
+
+    color:
+        white;
+
+    font-size:
+        10px;
+
+    font-weight:
+        900;
+
+}
+
+
+.sidebar-footer {
+
+    margin-top:
+        auto;
+
+    padding:
+        12px;
+
+    border-radius:
+        15px;
+
+}
+
+
+.connection-row {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+}
+
+
+.version {
+
+    color:
+        var(--muted-dark);
+
+    font-size:
+        10px;
+
+    margin-top:
+        5px;
+
+}
+
+
+.dot {
+
+    width:
+        8px;
+
+    height:
+        8px;
+
+    border-radius:
+        50%;
+
+    background:
+        #687080;
+
+}
+
+
+.dot.online {
+
+    background:
+        var(--green);
+
+    box-shadow:
+
+        0 0 0 4px
+        rgba(53,213,138,.11),
+
+        0 0 18px
+        rgba(53,213,138,.38);
+
+}
+
+
+.dot.offline {
+
+    background:
+        var(--danger);
+
+}
+
+
+/* =====================================================
+   WORKSPACE
+===================================================== */
+
+.workspace {
+
+    min-width:
+        0;
+
+}
+
+
+/* =====================================================
+   TOPBAR
+===================================================== */
+
+.topbar {
+
+    height:
+        88px;
+
+    position:
+        sticky;
+
+    top:
+        0;
+
+    z-index:
+        30;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 30px;
+
+    background:
+        rgba(7,9,13,.77);
+
+    border-bottom:
+        1px solid
+        var(--line);
+
+    backdrop-filter:
+        blur(24px);
+
+}
+
+
+.top-left {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        14px;
+
+}
+
+
+.top-kicker {
+
+    color:
+        var(--red);
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        .18em;
+
+    font-weight:
+        900;
+
+}
+
+
+.topbar h1 {
+
+    margin:
+        4px 0 0;
+
+    font-family:
+        "Arial Black",
+        "Segoe UI",
+        sans-serif;
+
+    font-size:
+        24px;
+
+    letter-spacing:
+        -.02em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.top-actions {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+}
+
+
+.connection-pill {
+
+    height:
+        39px;
+
+    padding:
+        0 14px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        999px;
+
+    color:
+        var(--muted);
+
+    background:
+        rgba(255,255,255,.035);
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.button {
+
+    min-height:
+        40px;
+
+    padding:
+        0 16px;
+
+    border-radius:
+        12px;
+
+    border:
+        1px solid
+        var(--line);
+
+    color:
+        white;
+
+    font-weight:
+        850;
+
+    transition:
+        .17s ease;
+
+}
+
+
+.button:hover {
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+.button.red {
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #ff303b,
+            #bb0b15
+        );
+
+    border-color:
+        rgba(239,29,40,.48);
+
+    box-shadow:
+
+        0 13px 32px
+        rgba(239,29,40,.19);
+
+}
+
+
+.button.red:hover {
+
+    box-shadow:
+
+        0 16px 40px
+        rgba(239,29,40,.29);
+
+}
+
+
+.button.dark {
+
+    background:
+        rgba(255,255,255,.045);
+
+}
+
+
+.button.full {
+
+    width:
+        100%;
+
+}
+
+
+.icon-button {
+
+    width:
+        40px;
+
+    height:
+        40px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    color:
+        white;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(255,255,255,.04);
+
+}
+
+
+.mobile-menu {
+
+    display:
+        none;
+
+}
+
+
+/* =====================================================
+   MAIN CONTENT
+===================================================== */
+
+.content {
+
+    max-width:
+        1800px;
+
+    margin:
+        auto;
+
+    padding:
+        28px;
+
+}
+
+
+.page {
+
+    display:
+        none;
+
+    animation:
+        page-enter .28s ease;
+
+}
+
+
+.page.active {
+
+    display:
+        block;
+
+}
+
+
+@keyframes page-enter {
+
+    from {
+
+        opacity:
+            0;
+
+        transform:
+            translateY(8px);
+
+    }
+
+    to {
+
+        opacity:
+            1;
+
+        transform:
+            none;
+
+    }
+
+}
+
+
+/* =====================================================
+   TYPOGRAPHY
+===================================================== */
+
+.eyebrow {
+
+    color:
+        #8791a3;
+
+    font-size:
+        10px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .18em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.section-heading {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap:
+        20px;
+
+    margin-bottom:
+        20px;
+
+}
+
+
+.section-heading h2 {
+
+    margin:
+        4px 0 0;
+
+    font-family:
+        "Arial Black",
+        "Segoe UI",
+        sans-serif;
+
+    font-size:
+        24px;
+
+    letter-spacing:
+        -.025em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.section-heading p {
+
+    max-width:
+        760px;
+
+    margin:
+        7px 0 0;
+
+    color:
+        var(--muted);
+
+    line-height:
+        1.55;
+
+}
+
+
+/* =====================================================
+   BADGES
+===================================================== */
+
+.badge {
+
+    display:
+        inline-flex;
+
+    min-height:
+        27px;
+
+    padding:
+        0 9px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        999px;
+
+    border:
+        1px solid
+        transparent;
+
+    font-size:
+        10px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .05em;
+
+}
+
+
+.badge.success {
+
+    color:
+        #87efbb;
+
+    background:
+        var(--green-soft);
+
+    border-color:
+        rgba(53,213,138,.22);
+
+}
+
+
+.badge.warning {
+
+    color:
+        #ffd083;
+
+    background:
+        var(--amber-soft);
+
+    border-color:
+        rgba(255,184,77,.22);
+
+}
+
+
+.badge.danger {
+
+    color:
+        #ff9199;
+
+    background:
+        rgba(255,77,90,.12);
+
+    border-color:
+        rgba(255,77,90,.23);
+
+}
+
+
+.badge.simulated {
+
+    color:
+        #c6b0ff;
+
+    background:
+        var(--purple-soft);
+
+    border-color:
+        rgba(169,133,255,.24);
+
+}
+
+
+.badge.info {
+
+    color:
+        #90e9f9;
+
+    background:
+        var(--cyan-soft);
+
+    border-color:
+        rgba(70,201,232,.2);
+
+}
+
+
+.badge.neutral {
+
+    color:
+        #bdc5d3;
+
+    background:
+        rgba(255,255,255,.05);
+
+    border-color:
+        var(--line);
+
+}
+
+
+/* =====================================================
+   OVERVIEW HERO
+===================================================== */
+
+.hero-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        minmax(0,1.4fr)
+        minmax(350px,.6fr);
+
+    gap:
+        18px;
+
+}
+
+
+.hero {
+
+    min-height:
+        290px;
+
+    padding:
+        28px;
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+.hero::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    width:
+        280px;
+
+    height:
+        280px;
+
+    top:
+        -150px;
+
+    right:
+        -125px;
+
+    border-radius:
+        50%;
+
+    background:
+
+        radial-gradient(
+            circle,
+            rgba(239,29,40,.35),
+            transparent 68%
+        );
+
+}
+
+
+.hero-top {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+}
+
+
+.hero-state {
+
+    margin-top:
+        37px;
+
+    max-width:
+        780px;
+
+    font-family:
+        "Arial Black",
+        "Segoe UI",
+        sans-serif;
+
+    font-size:
+        clamp(
+            34px,
+            4vw,
+            60px
+        );
+
+    line-height:
+        .98;
+
+    letter-spacing:
+        -.045em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.hero-copy {
+
+    max-width:
+        700px;
+
+    margin:
+        17px 0 25px;
+
+    color:
+        var(--muted);
+
+    line-height:
+        1.6;
+
+}
+
+
+.hero-stats {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:
+        14px;
+
+    padding-top:
+        20px;
+
+    border-top:
+        1px solid
+        var(--line);
+
+}
+
+
+.hero-stats span {
+
+    display:
+        block;
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+}
+
+
+.hero-stats strong {
+
+    display:
+        block;
+
+    margin-top:
+        5px;
+
+    font-family:
+        "Arial Black",
+        "Segoe UI",
+        sans-serif;
+
+    font-size:
+        24px;
+
+}
+
+
+.priority-panel {
+
+    padding:
+        20px;
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+.priority-head {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        14px;
+
+}
+
+
+.priority-head h2 {
+
+    margin:
+        4px 0 0;
+
+    font-family:
+        "Arial Black",
+        sans-serif;
+
+    font-size:
+        20px;
+
+}
+
+
+.request-stack {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        9px;
+
+    max-height:
+        220px;
+
+    overflow:
+        auto;
+
+}
+
+
+.request-mini {
+
+    padding:
+        13px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        14px;
+
+    background:
+        rgba(255,255,255,.035);
+
+}
+
+
+.request-mini-top {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+}
+
+
+.request-mini-meta {
+
+    margin-top:
+        8px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+}
+
+
+/* =====================================================
+   OVERVIEW LOWER
+===================================================== */
+
+.overview-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        minmax(0,1.55fr)
+        minmax(280px,.45fr);
+
+    gap:
+        18px;
+
+    margin-top:
+        18px;
+
+}
+
+
+.map-card {
+
+    padding:
+        18px;
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+.map {
+
+    width:
+        100%;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        17px;
+
+    overflow:
+        hidden;
+
+    background:
+        #090c11;
+
+}
+
+
+.overview-map {
+
+    height:
+        430px;
+
+}
+
+
+.main-map {
+
+    height:
+        670px;
+
+}
+
+
+.map-legend {
+
+    display:
+        flex;
+
+    gap:
+        15px;
+
+    padding-top:
+        12px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+}
+
+
+.legend-dot {
+
+    width:
+        8px;
+
+    height:
+        8px;
+
+    display:
+        inline-block;
+
+    border-radius:
+        50%;
+
+    margin-right:
+        5px;
+
+}
+
+
+.legend-dot.physical {
+
+    background:
+        white;
+
+}
+
+
+.legend-dot.simulated {
+
+    background:
+        var(--purple);
+
+}
+
+
+.legend-dot.failed {
+
+    background:
+        var(--danger);
+
+}
+
+
+.overview-side {
+
+    display:
+        grid;
+
+    grid-template-rows:
+        repeat(3,1fr);
+
+    gap:
+        18px;
+
+}
+
+
+.mini-card {
+
+    padding:
+        20px;
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+.big-value {
+
+    margin-top:
+        13px;
+
+    font-family:
+        "Arial Black",
+        sans-serif;
+
+    font-size:
+        43px;
+
+    letter-spacing:
+        -.04em;
+
+}
+
+
+.mini-caption {
+
+    margin-top:
+        4px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.4;
+
+}
+
+
+.progress {
+
+    height:
+        7px;
+
+    margin-top:
+        17px;
+
+    overflow:
+        hidden;
+
+    background:
+        rgba(255,255,255,.05);
+
+    border-radius:
+        999px;
+
+}
+
+
+.progress span {
+
+    height:
+        100%;
+
+    display:
+        block;
+
+    width:
+        0;
+
+    border-radius:
+        inherit;
+
+    background:
+
+        linear-gradient(
+            90deg,
+            var(--red),
+            #ff626a
+        );
+
+    transition:
+        width .35s ease;
+
+}
+
+
+.sensor-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        10px;
+
+    margin-top:
+        16px;
+
+}
+
+
+.sensor-grid div {
+
+    padding:
+        11px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(255,255,255,.025);
+
+}
+
+
+.sensor-grid small {
+
+    display:
+        block;
+
+    color:
+        var(--muted);
+
+    margin-bottom:
+        5px;
+
+}
+
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+.events-panel {
+
+    margin-top:
+        18px;
+
+    padding:
+        20px;
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+.event-list {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        9px;
+
+}
+
+
+.event-list.compact {
+
+    max-height:
+        310px;
+
+    overflow:
+        auto;
+
+}
+
+
+.event-item {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        10px
+        minmax(0,1fr)
+        auto;
+
+    gap:
+        12px;
+
+    align-items:
+        start;
+
+    padding:
+        13px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        14px;
+
+    background:
+        rgba(255,255,255,.025);
+
+}
+
+
+.event-dot {
+
+    width:
+        9px;
+
+    height:
+        9px;
+
+    margin-top:
+        5px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--cyan);
+
+}
+
+
+.event-dot.WARNING {
+
+    background:
+        var(--amber);
+
+}
+
+
+.event-dot.CRITICAL,
+.event-dot.SECURITY {
+
+    background:
+        var(--danger);
+
+}
+
+
+.event-title {
+
+    font-size:
+        13px;
+
+    font-weight:
+        900;
+
+}
+
+
+.event-description {
+
+    margin-top:
+        3px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.45;
+
+}
+
+
+.event-time {
+
+    color:
+        var(--muted-dark);
+
+    font-size:
+        11px;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+.card-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        repeat(
+            3,
+            minmax(0,1fr)
+        );
+
+    gap:
+        16px;
+
+}
+
+
+.entity-card {
+
+    padding:
+        18px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        18px;
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(20,24,34,.76),
+            rgba(10,13,19,.68)
+        );
+
+    box-shadow:
+
+        0 16px 46px
+        rgba(0,0,0,.2);
+
+    transition:
+        .18s ease;
+
+}
+
+
+.entity-card:hover {
+
+    transform:
+        translateY(-2px);
+
+    background:
+        var(--panel-hover);
+
+    border-color:
+        var(--line-strong);
+
+}
+
+
+.entity-head {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap:
+        10px;
+
+}
+
+
+.entity-head h3 {
+
+    margin:
+        0;
+
+    font-family:
+        "Arial Black",
+        sans-serif;
+
+    font-size:
+        17px;
+
+    letter-spacing:
+        -.02em;
+
+}
+
+
+.entity-sub {
+
+    color:
+        var(--muted);
+
+    margin-top:
+        4px;
+
+    font-size:
+        11px;
+
+}
+
+
+.entity-data {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        9px;
+
+    margin-top:
+        16px;
+
+}
+
+
+.entity-data div {
+
+    padding:
+        10px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(255,255,255,.025);
+
+}
+
+
+.entity-data small {
+
+    display:
+        block;
+
+    margin-bottom:
+        5px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        10px;
+
+}
+
+
+.entity-data strong {
+
+    font-size:
+        12px;
+
+    word-break:
+        break-word;
+
+}
+
+
+.entity-actions {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+
+    margin-top:
+        15px;
+
+}
+
+
+.small-button {
+
+    min-height:
+        34px;
+
+    padding:
+        0 11px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        10px;
+
+    color:
+        white;
+
+    background:
+        rgba(255,255,255,.035);
+
+    font-size:
+        11px;
+
+    font-weight:
+        900;
+
+}
+
+
+.small-button.green {
+
+    color:
+        #83f0b8;
+
+    border-color:
+        rgba(53,213,138,.22);
+
+    background:
+        var(--green-soft);
+
+}
+
+
+.small-button.red {
+
+    color:
+        #ff8c94;
+
+    border-color:
+        rgba(239,29,40,.28);
+
+    background:
+        var(--red-soft);
+
+}
+
+
+/* =====================================================
+   ROUTING
+===================================================== */
+
+.route-layout {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        330px
+        minmax(0,1fr);
+
+    gap:
+        18px;
+
+}
+
+
+.route-panel {
+
+    align-self:
+        start;
+
+    position:
+        sticky;
+
+    top:
+        112px;
+
+    padding:
+        20px;
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+.route-panel label {
+
+    display:
+        block;
+
+    margin:
+        14px 0 7px;
+
+    color:
+        #c9ced8;
+
+    font-size:
+        11px;
+
+    font-weight:
+        900;
+
+}
+
+
+input,
+select {
+
+    width:
+        100%;
+
+    min-height:
+        43px;
+
+    padding:
+        0 12px;
+
+    color:
+        white;
+
+    background:
+        rgba(255,255,255,.04);
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        12px;
+
+    outline:
+        none;
+
+}
+
+
+input:focus,
+select:focus {
+
+    border-color:
+        rgba(239,29,40,.55);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(239,29,40,.08);
+
+}
+
+
+select option {
+
+    color:
+        white;
+
+    background:
+        #11151d;
+
+}
+
+
+.switch-row {
+
+    display:
+        flex !important;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+}
+
+
+.switch-row input {
+
+    min-height:
+        0;
+
+    width:
+        18px;
+
+    accent-color:
+        var(--red);
+
+}
+
+
+.route-metrics {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        9px;
+
+    margin-top:
+        17px;
+
+}
+
+
+.route-metrics div {
+
+    padding:
+        11px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(255,255,255,.025);
+
+}
+
+
+.route-metrics span {
+
+    display:
+        block;
+
+    color:
+        var(--muted);
+
+    font-size:
+        10px;
+
+}
+
+
+.route-metrics strong {
+
+    display:
+        block;
+
+    margin-top:
+        4px;
+
+    font-size:
+        15px;
+
+}
+
+
+.route-message {
+
+    margin-top:
+        14px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+
+}
+
+
+.route-alert {
+
+    margin-top:
+        13px;
+
+    padding:
+        11px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        12px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+}
+
+
+.route-alert.warning {
+
+    color:
+        #ffd08a;
+
+    background:
+        var(--amber-soft);
+
+    border-color:
+        rgba(255,184,77,.18);
+
+}
+
+
+.route-alert.success {
+
+    color:
+        #86efba;
+
+    background:
+        var(--green-soft);
+
+    border-color:
+        rgba(53,213,138,.18);
+
+}
+
+
+.full-map-card {
+
+    padding:
+        14px;
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+/* =====================================================
+   HEALTH BAR
+===================================================== */
+
+.health-bar {
+
+    height:
+        5px;
+
+    margin-top:
+        14px;
+
+    overflow:
+        hidden;
+
+    background:
+        #2a303a;
+
+    border-radius:
+        999px;
+
+}
+
+
+.health-bar span {
+
+    display:
+        block;
+
+    height:
+        100%;
+
+}
+
+
+.health-bar .ONLINE {
+
+    width:
+        100%;
+
+    background:
+        var(--green);
+
+}
+
+
+.health-bar .DEGRADED {
+
+    width:
+        65%;
+
+    background:
+        var(--amber);
+
+}
+
+
+.health-bar .OFFLINE,
+.health-bar .FAILED {
+
+    width:
+        28%;
+
+    background:
+        var(--danger);
+
+}
+
+
+/* =====================================================
+   HOSPITAL
+===================================================== */
+
+.hospital-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
+
+    gap:
+        18px;
+
+}
+
+
+.hospital-card {
+
+    padding:
+        20px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        var(--radius);
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(20,24,34,.78),
+            rgba(9,12,18,.65)
+        );
+
+}
+
+
+.incoming-list {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        8px;
+
+    margin-top:
+        15px;
+
+}
+
+
+.incoming {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    padding:
+        10px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(255,255,255,.025);
+
+}
+
+
+/* =====================================================
+   CAMERAS
+===================================================== */
+
+.camera-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
+
+    gap:
+        18px;
+
+}
+
+
+.camera-card {
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        20px;
+
+    background:
+        rgba(15,18,26,.76);
+
+}
+
+
+.camera-view {
+
+    height:
+        270px;
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    background:
+
+        linear-gradient(
+            115deg,
+            transparent 0 44%,
+            rgba(255,255,255,.07) 45% 46%,
+            transparent 47%
+        ),
+
+        linear-gradient(
+            90deg,
+            #06080c,
+            #121721
+        );
+
+}
+
+
+.camera-view::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        -15%;
+
+    width:
+        5px;
+
+    height:
+        140%;
+
+    background:
+
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,255,255,.8)
+            0 18px,
+            transparent
+            18px 34px
+        );
+
+    transform:
+
+        perspective(250px)
+        rotateX(55deg);
+
+    opacity:
+        .6;
+
+}
+
+
+.camera-scan {
+
+    position:
+        absolute;
+
+    width:
+        100%;
+
+    height:
+        4px;
+
+    background:
+
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--red),
+            transparent
+        );
+
+    box-shadow:
+
+        0 0 30px
+        rgba(239,29,40,.45);
+
+    animation:
+        scan 3.2s
+        linear
+        infinite;
+
+}
+
+
+@keyframes scan {
+
+    from {
+
+        top:
+            15%;
+
+    }
+
+    to {
+
+        top:
+            90%;
+
+    }
+
+}
+
+
+.camera-top {
+
+    position:
+        absolute;
+
+    inset:
+        14px 14px auto 14px;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    z-index:
+        3;
+
+}
+
+
+.camera-bottom {
+
+    position:
+        absolute;
+
+    left:
+        14px;
+
+    bottom:
+        14px;
+
+    z-index:
+        3;
+
+}
+
+
+.camera-body {
+
+    padding:
+        16px;
+
+}
+
+
+.analysis-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:
+        8px;
+
+    margin-top:
+        13px;
+
+}
+
+
+.analysis-grid div {
+
+    padding:
+        9px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        11px;
+
+    background:
+        rgba(255,255,255,.025);
+
+}
+
+
+.analysis-grid small {
+
+    display:
+        block;
+
+    color:
+        var(--muted);
+
+    font-size:
+        9px;
+
+    margin-bottom:
+        4px;
+
+}
+
+
+/* =====================================================
+   EVIDENCE
+===================================================== */
+
+.upload-card {
+
+    padding:
+        17px;
+
+    margin-bottom:
+        18px;
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+.upload-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        1.3fr
+        repeat(4,1fr);
+
+    gap:
+        9px;
+
+}
+
+
+.evidence-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        repeat(
+            4,
+            minmax(0,1fr)
+        );
+
+    gap:
+        14px;
+
+}
+
+
+.evidence-card {
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        17px;
+
+    background:
+        rgba(15,18,25,.75);
+
+}
+
+
+.evidence-preview {
+
+    height:
+        150px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    color:
+        #778092;
+
+    font-family:
+        "Arial Black",
+        sans-serif;
+
+    letter-spacing:
+        .08em;
+
+    background:
+
+        radial-gradient(
+            circle at 50% 40%,
+            rgba(239,29,40,.1),
+            transparent 45%
+        ),
+
+        #090c11;
+
+}
+
+
+.evidence-body {
+
+    padding:
+        13px;
+
+}
+
+
+.evidence-body h3 {
+
+    margin:
+        0 0 7px;
+
+    font-size:
+        14px;
+
+}
+
+
+.evidence-body p {
+
+    margin:
+        4px 0;
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+    line-height:
+        1.4;
+
+}
+
+
+/* =====================================================
+   TEAM
+===================================================== */
+
+.team-hero {
+
+    min-height:
+        250px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    text-align:
+        center;
+
+    padding:
+        26px;
+
+    margin-bottom:
+        28px;
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+.team-logo {
+
+    width:
+        min(650px,90%);
+
+    max-height:
+        150px;
+
+    object-fit:
+        contain;
+
+}
+
+
+.team-hero p {
+
+    margin:
+        0;
+
+    max-width:
+        650px;
+
+    color:
+        var(--muted);
+
+}
+
+
+.team-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        repeat(
+            4,
+            minmax(0,1fr)
+        );
+
+    gap:
+        16px;
+
+}
+
+
+.team-card {
+
+    padding:
+        18px;
+
+    text-align:
+        center;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        18px;
+
+    background:
+        rgba(16,20,28,.72);
+
+}
+
+
+.team-avatar {
+
+    width:
+        70px;
+
+    height:
+        70px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    margin:
+        auto auto 13px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        18px;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.08),
+            rgba(239,29,40,.16)
+        );
+
+    font-family:
+        "Arial Black",
+        sans-serif;
+
+}
+
+
+.team-card h3 {
+
+    margin:
+        0;
+
+}
+
+
+.team-role {
+
+    margin-top:
+        4px;
+
+    color:
+        var(--red);
+
+    font-size:
+        11px;
+
+    font-weight:
+        900;
+
+}
+
+
+.team-description {
+
+    margin-top:
+        10px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+    line-height:
+        1.45;
+
+}
+
+
+/* =====================================================
+   DEMO DRAWER
+===================================================== */
+
+.demo-backdrop {
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    background:
+        rgba(0,0,0,.55);
+
+    opacity:
+        0;
+
+    pointer-events:
+        none;
+
+    z-index:
+        90;
+
+    transition:
+        .2s ease;
+
+}
+
+
+.demo-backdrop.open {
+
+    opacity:
+        1;
+
+    pointer-events:
+        auto;
+
+}
+
+
+.demo-drawer {
+
+    position:
+        fixed;
+
+    top:
+        0;
+
+    right:
+        -430px;
+
+    width:
+        min(410px,92vw);
+
+    height:
+        100vh;
+
+    overflow-y:
+        auto;
+
+    z-index:
+        100;
+
+    padding:
+        22px;
+
+    border-radius:
+        24px 0 0 24px;
+
+    transition:
+        right .25s ease;
+
+}
+
+
+.demo-drawer.open {
+
+    right:
+        0;
+
+}
+
+
+.drawer-head {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+}
+
+
+.drawer-head h2 {
+
+    margin:
+        4px 0;
+
+    font-family:
+        "Arial Black",
+        sans-serif;
+
+}
+
+
+.drawer-description {
+
+    color:
+        var(--muted);
+
+    line-height:
+        1.5;
+
+    font-size:
+        12px;
+
+}
+
+
+.demo-section {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        8px;
+
+    margin-top:
+        18px;
+
+    padding-top:
+        17px;
+
+    border-top:
+        1px solid
+        var(--line);
+
+}
+
+
+.demo-section-title {
+
+    color:
+        var(--muted);
+
+    font-size:
+        10px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .14em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+/* =====================================================
+   TOASTS
+===================================================== */
+
+.toast-stack {
+
+    position:
+        fixed;
+
+    right:
+        24px;
+
+    top:
+        105px;
+
+    z-index:
+        150;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        9px;
+
+    pointer-events:
+        none;
+
+}
+
+
+.toast {
+
+    min-width:
+        280px;
+
+    max-width:
+        380px;
+
+    padding:
+        13px 14px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        14px;
+
+    background:
+        rgba(15,19,27,.95);
+
+    backdrop-filter:
+        blur(20px);
+
+    box-shadow:
+        0 22px 60px
+        rgba(0,0,0,.36);
+
+    animation:
+        toast-in .25s ease;
+
+}
+
+
+.toast strong {
+
+    display:
+        block;
+
+    font-size:
+        12px;
+
+}
+
+
+.toast span {
+
+    display:
+        block;
+
+    margin-top:
+        4px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+}
+
+
+@keyframes toast-in {
+
+    from {
+
+        opacity:
+            0;
+
+        transform:
+            translateX(25px);
+
+    }
+
+    to {
+
+        opacity:
+            1;
+
+        transform:
+            none;
+
+    }
+
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.empty {
+
+    padding:
+        18px;
+
+    color:
+        var(--muted-dark);
+
+    border:
+        1px dashed
+        var(--line);
+
+    border-radius:
+        13px;
+
+    text-align:
+        center;
+
+    font-size:
+        12px;
+
+}
+
+
+/* =====================================================
+   LEAFLET
+===================================================== */
+
+.leaflet-container {
+
+    background:
+        #090c11;
+
+    font-family:
+        "Segoe UI",
+        sans-serif;
+
+}
+
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+
+    color:
+        white;
+
+    background:
+        #111620;
+
+}
+
+
+.custom-marker {
+
+    width:
+        22px;
+
+    height:
+        22px;
+
+    border-radius:
+        50%;
+
+    border:
+        3px solid
+        white;
+
+    box-shadow:
+
+        0 0 0 5px
+        rgba(255,255,255,.07),
+
+        0 10px 25px
+        rgba(0,0,0,.35);
+
+}
+
+
+.custom-marker.vehicle {
+
+    background:
+        var(--red);
+
+}
+
+
+.custom-marker.junction {
+
+    background:
+        var(--green);
+
+}
+
+
+.custom-marker.failed {
+
+    background:
+        var(--danger);
+
+}
+
+
+.custom-marker.simulated {
+
+    border-color:
+        var(--purple);
+
+}
+
+
+.custom-marker.hospital {
+
+    background:
+        white;
+
+    border-color:
+        var(--cyan);
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:1250px) {
+
+    .hero-grid,
+    .overview-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .overview-side {
+
+        grid-template-columns:
+            repeat(3,1fr);
+
+        grid-template-rows:
+            none;
+
+    }
+
+
+    .card-grid {
+
+        grid-template-columns:
+            repeat(2,1fr);
+
+    }
+
+
+    .team-grid {
+
+        grid-template-columns:
+            repeat(2,1fr);
+
+    }
+
+
+    .evidence-grid {
+
+        grid-template-columns:
+            repeat(3,1fr);
+
+    }
+
+}
+
+
+@media(max-width:980px) {
+
+    .app-shell {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .sidebar {
+
+        position:
+            fixed;
+
+        left:
+            -270px;
+
+        width:
+            250px;
+
+        transition:
+            left .25s ease;
+
+    }
+
+
+    .sidebar.open {
+
+        left:
+            0;
+
+    }
+
+
+    .mobile-menu {
+
+        display:
+            grid;
+
+    }
+
+
+    .route-layout {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .route-panel {
+
+        position:
+            static;
+
+    }
+
+
+    .camera-grid,
+    .hospital-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .upload-grid {
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+}
+
+
+@media(max-width:680px) {
+
+    .content {
+
+        padding:
+            16px;
+
+    }
+
+
+    .topbar {
+
+        padding:
+            0 15px;
+
+        height:
+            78px;
+
+    }
+
+
+    .top-kicker,
+    #refreshButton,
+    .connection-pill {
+
+        display:
+            none;
+
+    }
+
+
+    .topbar h1 {
+
+        font-size:
+            19px;
+
+    }
+
+
+    .hero {
+
+        padding:
+            20px;
+
+    }
+
+
+    .hero-state {
+
+        font-size:
+            35px;
+
+    }
+
+
+    .hero-stats {
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+
+    .overview-side,
+    .card-grid,
+    .team-grid,
+    .evidence-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .upload-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .main-map {
+
+        height:
+            480px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="ambient one"></div>
+<div class="ambient two"></div>
+
+
+<div class="app-shell">
+
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside
+    class="sidebar"
+    id="sidebar"
+>
+
+    <div class="logo-wrap">
+
+        <img
+            src="/static/images/prioway-logo.png"
+            alt="PrioWay"
+        >
+
+    </div>
+
+
+    <nav class="nav">
+
+
+        <div class="nav-title">
+            Command
+        </div>
+
+
+        <button
+            class="nav-item active"
+            data-page="overview"
+        >
+            <span class="nav-icon">◆</span>
+            Overview
+        </button>
+
+
+        <button
+            class="nav-item"
+            data-page="map"
+        >
+            <span class="nav-icon">◎</span>
+            Live Map
+        </button>
+
+
+        <div class="nav-title">
+            Operations
+        </div>
+
+
+        <button
+            class="nav-item"
+            data-page="requests"
+        >
+            <span class="nav-icon">!</span>
+
+            Requests
+
+            <span
+                class="nav-count"
+                id="requestCountNav"
+            >
+                0
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item"
+            data-page="vehicles"
+        >
+            <span class="nav-icon">V</span>
+            Vehicles
+        </button>
+
+
+        <button
+            class="nav-item"
+            data-page="junctions"
+        >
+            <span class="nav-icon">J</span>
+            Junctions
+        </button>
+
+
+        <button
+            class="nav-item"
+            data-page="hospitals"
+        >
+            <span class="nav-icon">+</span>
+            Hospital
+        </button>
+
+
+        <div class="nav-title">
+            Intelligence
+        </div>
+
+
+        <button
+            class="nav-item"
+            data-page="cameras"
+        >
+            <span class="nav-icon">◉</span>
+            Cameras
+        </button>
+
+
+        <button
+            class="nav-item"
+            data-page="evidence"
+        >
+            <span class="nav-icon">▣</span>
+            Evidence
+        </button>
+
+
+        <button
+            class="nav-item"
+            data-page="events"
+        >
+            <span class="nav-icon">≡</span>
+            Events
+        </button>
+
+
+        <div class="nav-title">
+            Project
+        </div>
+
+
+        <button
+            class="nav-item"
+            data-page="team"
+        >
+            <span class="nav-icon">P</span>
+            Team
+        </button>
+
+
+    </nav>
+
+
+    <div class="sidebar-footer glass">
+
+        <div class="connection-row">
+
+            <span
+                class="dot"
+                id="sideDot"
+            ></span>
+
+            <span id="sideStatus">
+                Connecting
+            </span>
+
+        </div>
+
+
+        <div class="version">
+            PRIOWAY API V1
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- =====================================================
+     WORKSPACE
+===================================================== -->
+
+<div class="workspace">
+
+
+<header class="topbar">
+
+
+    <div class="top-left">
+
+
+        <button
+            class="icon-button mobile-menu"
+            id="mobileMenu"
+        >
+            ☰
+        </button>
+
+
+        <div>
+
+            <div class="top-kicker">
+                PRIOWAY COMMAND CENTER
+            </div>
+
+            <h1 id="pageTitle">
+                Overview
+            </h1>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="top-actions">
+
+
+        <div
+            class="connection-pill"
+            id="connectionPill"
+        >
+
+            <span class="dot"></span>
+
+            <span>
+                Connecting
+            </span>
+
+        </div>
+
+
+        <button
+            class="button dark"
+            id="refreshButton"
+        >
+            Refresh
+        </button>
+
+
+        <button
+            class="button red"
+            id="demoOpen"
+        >
+            Demo Mode
+        </button>
+
+
+    </div>
+
+
+</header>
+
+
+<main class="content">
+
+
+<!-- =====================================================
+     OVERVIEW
+===================================================== -->
+
+<section
+    class="page active"
+    data-panel="overview"
+>
+
+
+<div class="hero-grid">
+
+
+    <article class="hero glass">
+
+        <div class="hero-top">
+
+            <span class="eyebrow">
+                LIVE NETWORK STATE
+            </span>
+
+            <span
+                class="badge neutral"
+                id="systemStateBadge"
+            >
+                CONNECTING
+            </span>
+
+        </div>
+
+
+        <div
+            class="hero-state"
+            id="heroState"
+        >
+            PRIOWAY ONLINE
+        </div>
+
+
+        <p
+            class="hero-copy"
+            id="heroCopy"
+        >
+            Connecting vehicles, junction intelligence,
+            emergency routing and hospital awareness
+            through one unified mobility platform.
+        </p>
+
+
+        <div class="hero-stats">
+
+
+            <div>
+
+                <span>
+                    Vehicles
+                </span>
+
+                <strong id="vehicleMetric">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Junctions
+                </span>
+
+                <strong id="junctionMetric">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Active Requests
+                </span>
+
+                <strong id="requestMetric">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Unhealthy Nodes
+                </span>
+
+                <strong id="unhealthyMetric">
+                    —
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+    </article>
+
+
+    <article class="priority-panel glass">
+
+
+        <div class="priority-head">
+
+            <div>
+
+                <span class="eyebrow">
+                    PRIORITY QUEUE
+                </span>
+
+                <h2>
+                    Emergency Operations
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="request-stack"
+            id="overviewRequests"
+        >
+
+            <div class="empty">
+                No active requests.
+            </div>
+
+        </div>
+
+
+    </article>
+
+
+</div>
+
+
+<div class="overview-grid">
+
+
+    <article class="map-card glass">
+
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="eyebrow">
+                    LIVE NETWORK
+                </span>
+
+                <h2>
+                    Operational Map
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="overviewMap"
+            class="map overview-map"
+        ></div>
+
+
+        <div class="map-legend">
+
+            <span>
+                <i class="legend-dot physical"></i>
+                Physical
+            </span>
+
+            <span>
+                <i class="legend-dot simulated"></i>
+                Simulated
+            </span>
+
+            <span>
+                <i class="legend-dot failed"></i>
+                Failed
+            </span>
+
+        </div>
+
+
+    </article>
+
+
+    <div class="overview-side">
+
+
+        <article class="mini-card glass">
+
+            <span class="eyebrow">
+                JUNCTION HEALTH
+            </span>
+
+            <div
+                class="big-value"
+                id="healthyJunctions"
+            >
+                —
+            </div>
+
+            <div class="mini-caption">
+                healthy junction nodes
+            </div>
+
+            <div class="progress">
+
+                <span id="healthProgress"></span>
+
+            </div>
+
+        </article>
+
+
+        <article class="mini-card glass">
+
+            <span class="eyebrow">
+                ENVIRONMENT
+            </span>
+
+            <div class="sensor-grid">
+
+                <div>
+
+                    <small>
+                        Gas
+                    </small>
+
+                    <strong id="gasOverview">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        Temperature
+                    </small>
+
+                    <strong id="tempOverview">
+                        —
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="mini-caption">
+                Sources remain clearly labeled as
+                physical or simulated.
+            </div>
+
+        </article>
+
+
+        <article class="mini-card glass">
+
+            <span class="eyebrow">
+                SECURITY
+            </span>
+
+            <div
+                class="big-value"
+                id="securityEvents"
+            >
+                0
+            </div>
+
+            <div class="mini-caption">
+                security / blocked events recorded
+            </div>
+
+        </article>
+
+
+    </div>
+
+
+</div>
+
+
+<article class="events-panel glass">
+
+
+    <div class="section-heading">
+
+        <div>
+
+            <span class="eyebrow">
+                AUDIT TRAIL
+            </span>
+
+            <h2>
+                Recent System Events
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="overviewEvents"
+        class="event-list compact"
+    ></div>
+
+
+</article>
+
+
+</section>
+
+
+<!-- =====================================================
+     LIVE MAP
+===================================================== -->
+
+<section
+    class="page"
+    data-panel="map"
+>
+
+
+<div class="section-heading">
+
+    <div>
+
+        <span class="eyebrow">
+            ROUTE INTELLIGENCE
+        </span>
+
+        <h2>
+            Live Map & Health-Aware Routing
+        </h2>
+
+        <p>
+            Route emergency vehicles while considering
+            known junction failures and route health.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="route-layout">
+
+
+    <aside class="route-panel glass">
+
+
+        <label>
+            Vehicle
+        </label>
+
+
+        <select id="routeVehicle">
+
+            <option value="">
+                Manual Start
+            </option>
+
+        </select>
+
+
+        <div id="manualStart">
+
+            <label>
+                Start Location
+            </label>
+
+            <input
+                id="startPlace"
+                placeholder="Example: Rohini Delhi"
+            >
+
+        </div>
+
+
+        <label>
+            Destination
+        </label>
+
+        <input
+            id="destinationPlace"
+            placeholder="Example: AIIMS Delhi"
+        >
+
+
+        <label class="switch-row">
+
+            <span>
+                Health-aware rerouting
+            </span>
+
+            <input
+                type="checkbox"
+                id="healthAware"
+                checked
+            >
+
+        </label>
+
+
+        <button
+            class="button red full"
+            id="routeButton"
+        >
+            Calculate Route
+        </button>
+
+
+        <div
+            class="route-message"
+            id="routeMessage"
+        ></div>
+
+
+        <div class="route-metrics">
+
+
+            <div>
+
+                <span>
+                    Distance
+                </span>
+
+                <strong id="routeDistance">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Normal ETA
+                </span>
+
+                <strong id="routeEta">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    PrioWay ETA
+                </span>
+
+                <strong id="routeGreenEta">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Time Saved
+                </span>
+
+                <strong id="routeSaved">
+                    —
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+        <div
+            class="route-alert"
+            id="routeAlert"
+        >
+            No route calculated.
+        </div>
+
+
+    </aside>
+
+
+    <article class="full-map-card glass">
+
+        <div
+            id="mainMap"
+            class="map main-map"
+        ></div>
+
+    </article>
+
+
+</div>
+
+
+</section>
+
+
+<!-- =====================================================
+     REQUESTS
+===================================================== -->
+
+<section
+    class="page"
+    data-panel="requests"
+>
+
+
+<div class="section-heading">
+
+    <div>
+
+        <span class="eyebrow">
+            EMERGENCY OPERATIONS
+        </span>
+
+        <h2>
+            Emergency Request Queue
+        </h2>
+
+        <p>
+            Verified, unverified, blocked and duplicate
+            emergency activity.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div
+    class="card-grid"
+    id="requestGrid"
+></div>
+
+
+</section>
+
+
+<!-- =====================================================
+     VEHICLES
+===================================================== -->
+
+<section
+    class="page"
+    data-panel="vehicles"
+>
+
+
+<div class="section-heading">
+
+    <div>
+
+        <span class="eyebrow">
+            VEHICLE REGISTRY
+        </span>
+
+        <h2>
+            Verification & Vehicle History
+        </h2>
+
+        <p>
+            Registered physical and simulated vehicles
+            share the same backend model.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div
+    class="card-grid"
+    id="vehicleGrid"
+></div>
+
+
+</section>
+
+
+<!-- =====================================================
+     JUNCTIONS
+===================================================== -->
+
+<section
+    class="page"
+    data-panel="junctions"
+>
+
+
+<div class="section-heading">
+
+    <div>
+
+        <span class="eyebrow">
+            NETWORK HEALTH
+        </span>
+
+        <h2>
+            Junction Operations
+        </h2>
+
+        <p>
+            Health, heartbeat, traffic signal and
+            environmental telemetry.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div
+    class="card-grid"
+    id="junctionGrid"
+></div>
+
+
+</section>
+
+
+<!-- =====================================================
+     HOSPITAL
+===================================================== -->
+
+<section
+    class="page"
+    data-panel="hospitals"
+>
+
+
+<div class="section-heading">
+
+    <div>
+
+        <span class="eyebrow">
+            HOSPITAL OPERATIONS
+        </span>
+
+        <h2>
+            Incoming Emergency Dashboard
+        </h2>
+
+        <p>
+            Arrival awareness for receiving hospitals.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div
+    class="hospital-grid"
+    id="hospitalGrid"
+></div>
+
+
+</section>
+
+
+<!-- =====================================================
+     CAMERAS
+===================================================== -->
+
+<section
+    class="page"
+    data-panel="cameras"
+>
+
+
+<div class="section-heading">
+
+    <div>
+
+        <span class="eyebrow">
+            TRAFFIC INTELLIGENCE
+        </span>
+
+        <h2>
+            Camera & Traffic Analysis
+        </h2>
+
+        <p>
+            Simulated sources are clearly marked until
+            real camera hardware is connected.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div
+    class="camera-grid"
+    id="cameraGrid"
+></div>
+
+
+</section>
+
+
+<!-- =====================================================
+     EVIDENCE
+===================================================== -->
+
+<section
+    class="page"
+    data-panel="evidence"
+>
+
+
+<div class="section-heading">
+
+    <div>
+
+        <span class="eyebrow">
+            EVIDENCE VAULT
+        </span>
+
+        <h2>
+            Photos, Video & Incident Records
+        </h2>
+
+        <p>
+            Evidence uploads are stored persistently and
+            recorded in the audit trail.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="upload-card glass">
+
+
+    <div class="upload-grid">
+
+
+        <input
+            type="file"
+            id="evidenceFile"
+            accept="image/*,video/*"
+        >
+
+
+        <input
+            id="evidenceRequest"
+            placeholder="Request ID"
+        >
+
+
+        <input
+            id="evidenceVehicle"
+            placeholder="Vehicle ID"
+        >
+
+
+        <input
+            id="evidenceJunction"
+            placeholder="Junction ID"
+        >
+
+
+        <input
+            id="evidenceDescription"
+            placeholder="Description"
+        >
+
+
+    </div>
+
+
+    <button
+        class="button red"
+        id="uploadEvidence"
+        style="margin-top:12px"
+    >
+        Upload Evidence
+    </button>
+
+
+    <div
+        class="route-message"
+        id="uploadMessage"
+    ></div>
+
+
+</div>
+
+
+<div
+    class="evidence-grid"
+    id="evidenceGrid"
+></div>
+
+
+</section>
+
+
+<!-- =====================================================
+     EVENTS
+===================================================== -->
+
+<section
+    class="page"
+    data-panel="events"
+>
+
+
+<div class="section-heading">
+
+    <div>
+
+        <span class="eyebrow">
+            SYSTEM AUDIT
+        </span>
+
+        <h2>
+            Event Timeline
+        </h2>
+
+        <p>
+            Emergency, health, security and evidence events.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div
+    class="event-list"
+    id="eventTimeline"
+></div>
+
+
+</section>
+
+
+<!-- =====================================================
+     TEAM
+===================================================== -->
+
+<section
+    class="page"
+    data-panel="team"
+>
+
+
+<div class="team-hero glass">
+
+
+    <img
+        class="team-logo"
+        src="/static/images/prioway-logo.png"
+        alt="PrioWay"
+    >
+
+
+    <p>
+        Intelligent emergency mobility,
+        priority routing and connected
+        junction awareness.
+    </p>
+
+
+</div>
+
+
+<div class="section-heading">
+
+    <div>
+
+        <span class="eyebrow">
+            THE PEOPLE BEHIND PRIOWAY
+        </span>
+
+        <h2>
+            Project Team
+        </h2>
+
+        <p>
+            We will replace the placeholders with your
+            actual team names and roles once you send them.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div
+    class="team-grid"
+    id="teamGrid"
+></div>
+
+
+</section>
+
+
+</main>
+
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     DEMO DRAWER
+===================================================== -->
+
+<div
+    class="demo-backdrop"
+    id="demoBackdrop"
+></div>
+
+
+<aside
+    class="demo-drawer glass"
+    id="demoDrawer"
+>
+
+
+<div class="drawer-head">
+
+
+    <div>
+
+        <span class="eyebrow">
+            PRESENTATION TOOLS
+        </span>
+
+        <h2>
+            Demo Mode
+        </h2>
+
+    </div>
+
+
+    <button
+        class="icon-button"
+        id="demoClose"
+    >
+        ×
+    </button>
+
+
+</div>
+
+
+<p class="drawer-description">
+
+    These actions create clearly labeled demo scenarios.
+    They use the actual PrioWay API and database.
+
+</p>
+
+
+<div class="demo-section">
+
+
+    <div class="demo-section-title">
+        Emergency Requests
+    </div>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/request/verified"
+    >
+        Create Verified Request
+    </button>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/request/unverified"
+    >
+        Create Unverified Request
+    </button>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/request/fake"
+    >
+        Create Fake Request
+    </button>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/request/duplicate"
+    >
+        Create Duplicate Request
+    </button>
+
+
+</div>
+
+
+<div class="demo-section">
+
+
+    <div class="demo-section-title">
+        Junction Failure
+    </div>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/junctions/JNC-SIM-002/fail"
+    >
+        Fail JNC-SIM-002
+    </button>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/junctions/JNC-SIM-003/fail"
+    >
+        Fail JNC-SIM-003
+    </button>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/junctions/JNC-SIM-004/fail"
+    >
+        Fail JNC-SIM-004
+    </button>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/junctions/JNC-SIM-002/recover"
+    >
+        Recover JNC-SIM-002
+    </button>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/junctions/JNC-SIM-003/recover"
+    >
+        Recover JNC-SIM-003
+    </button>
+
+
+    <button
+        class="button dark demoAction"
+        data-url="/api/v1/demo/junctions/JNC-SIM-004/recover"
+    >
+        Recover JNC-SIM-004
+    </button>
+
+
+</div>
+
+
+<div class="demo-section">
+
+
+    <button
+        class="button red full demoAction"
+        data-url="/api/v1/demo/reset"
+    >
+        Reset Demo State
+    </button>
+
+
+</div>
+
+
+</aside>
+
+
+<div
+    class="toast-stack"
+    id="toastStack"
+></div>
+
+
+<script src="/static/vendor/leaflet/leaflet.js"></script>
+
+
+<script>
+
+
+/* =====================================================
+   CONFIG
+===================================================== */
+
+const API =
+    "/api/v1";
+
+
+const PAGE_NAMES = {
+
+    overview:
+        "Overview",
+
+    map:
+        "Live Map",
+
+    requests:
+        "Emergency Requests",
+
+    vehicles:
+        "Vehicles",
+
+    junctions:
+        "Junctions",
+
+    hospitals:
+        "Hospital Dashboard",
+
+    cameras:
+        "Camera Intelligence",
+
+    evidence:
+        "Evidence",
+
+    events:
+        "Events",
+
+    team:
+        "Team"
+
+};
+
+
+const APP = {
+
+    status:
+        null,
+
+    vehicles:
+        [],
+
+    junctions:
+        [],
+
+    requests:
+        [],
+
+    hospitals:
+        [],
+
+    events:
+        [],
+
+    evidence:
+        [],
+
+    route:
+        null
+
+};
+
+
+/*
+Replace these later with actual members.
+I have deliberately NOT invented your team names.
+*/
+
+const TEAM = [
+
+    {
+
+        name:
+            "Team Member 1",
+
+        role:
+            "Project Lead",
+
+        description:
+            "Replace with actual member name and contribution."
+
+    },
+
+    {
+
+        name:
+            "Team Member 2",
+
+        role:
+            "Embedded Systems",
+
+        description:
+            "Replace with actual member name and contribution."
+
+    },
+
+    {
+
+        name:
+            "Team Member 3",
+
+        role:
+            "Software & Backend",
+
+        description:
+            "Replace with actual member name and contribution."
+
+    },
+
+    {
+
+        name:
+            "Team Member 4",
+
+        role:
+            "Mobile / Research",
+
+        description:
+            "Replace with actual member name and contribution."
+
+    }
+
+];
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+
+    .replaceAll(
+        "\"",
+        "&quot;"
+    );
+
+}
+
+
+function statusStyle(
+    status
+) {
+
+    status =
+        String(
+            status || ""
+        )
+        .toUpperCase();
+
+
+    if (
+        [
+            "ONLINE",
+            "VERIFIED",
+            "ACTIVE",
+            "COMPLETED",
+            "NORMAL"
+        ]
+        .includes(status)
+    ) {
+
+        return "success";
+
+    }
+
+
+    if (
+        [
+            "PENDING",
+            "APPROVED",
+            "ACTIVATING",
+            "DEGRADED",
+            "FLAGGED",
+            "POOR"
+        ]
+        .includes(status)
+    ) {
+
+        return "warning";
+
+    }
+
+
+    if (
+        [
+            "FAILED",
+            "OFFLINE",
+            "BLOCKED",
+            "REJECTED",
+            "DANGER",
+            "BLACKLISTED"
+        ]
+        .includes(status)
+    ) {
+
+        return "danger";
+
+    }
+
+
+    return "neutral";
+
+}
+
+
+function badge(
+    text,
+    style = null
+) {
+
+    return `
+
+        <span
+            class="badge ${
+                style
+                ||
+                statusStyle(text)
+            }"
+        >
+            ${escapeHTML(text)}
+        </span>
+
+    `;
+
+}
+
+
+function sourceBadge(
+    source
+) {
+
+    if (
+        String(source)
+        .toUpperCase()
+        === "SIMULATED"
+    ) {
+
+        return badge(
+            "SIMULATED",
+            "simulated"
+        );
+
+    }
+
+
+    return badge(
+        "PHYSICAL",
+        "info"
+    );
+
+}
+
+
+function lightName(
+    value
+) {
+
+    return {
+
+        0:
+            "RED",
+
+        1:
+            "GREEN",
+
+        2:
+            "YELLOW"
+
+    }[Number(value)]
+    ||
+    "UNKNOWN";
+
+}
+
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+
+        return "—";
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return String(value);
+
+    }
+
+
+    return date
+        .toLocaleString();
+
+}
+
+
+function ageText(
+    seconds
+) {
+
+    if (
+        seconds === null
+        ||
+        seconds === undefined
+    ) {
+
+        return "No heartbeat";
+
+    }
+
+
+    if (
+        seconds < 60
+    ) {
+
+        return (
+            Math.round(seconds)
+            +
+            " sec ago"
+        );
+
+    }
+
+
+    return (
+        Math.round(
+            seconds / 60
+        )
+        +
+        " min ago"
+    );
+
+}
+
+
+/* =====================================================
+   API
+===================================================== */
+
+async function apiGet(
+    path
+) {
+
+    const response =
+        await fetch(path);
+
+
+    let data = {};
+
+
+    try {
+
+        data =
+            await response.json();
+
+    }
+
+    catch (_) {
+
+    }
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+
+            data.message
+            ||
+            data.error
+            ||
+            (
+                "HTTP "
+                +
+                response.status
+            )
+
+        );
+
+    }
+
+
+    return data;
+
+}
+
+
+async function apiPost(
+    path,
+    body = null
+) {
+
+    const options = {
+
+        method:
+            "POST",
+
+        headers:
+            {}
+
+    };
+
+
+    if (
+        body !== null
+    ) {
+
+        options.headers[
+            "Content-Type"
+        ] =
+            "application/json";
+
+
+        options.body =
+            JSON.stringify(
+                body
+            );
+
+    }
+
+
+    const response =
+        await fetch(
+            path,
+            options
+        );
+
+
+    let data = {};
+
+
+    try {
+
+        data =
+            await response.json();
+
+    }
+
+    catch (_) {
+
+    }
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+
+            data.message
+            ||
+            data.error
+            ||
+            (
+                "HTTP "
+                +
+                response.status
+            )
+
+        );
+
+    }
+
+
+    return data;
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+function toast(
+    title,
+    message = "",
+    danger = false
+) {
+
+    const stack =
+        document.getElementById(
+            "toastStack"
+        );
+
+
+    const element =
+        document.createElement(
+            "div"
+        );
+
+
+    element.className =
+        "toast";
+
+
+    element.innerHTML = `
+
+        <strong>
+            ${
+                danger
+                ? "⚠ "
+                : "✓ "
+            }
+            ${escapeHTML(title)}
+        </strong>
+
+        <span>
+            ${escapeHTML(message)}
+        </span>
+
+    `;
+
+
+    stack.appendChild(
+        element
+    );
+
+
+    setTimeout(
+        () => {
+
+            element.style.opacity =
+                "0";
+
+            element.style.transform =
+                "translateX(25px)";
+
+            setTimeout(
+                () =>
+                    element.remove(),
+                220
+            );
+
+        },
+        3800
+    );
+
+}
+
+
+/* =====================================================
+   CONNECTION
+===================================================== */
+
+function setConnection(
+    online
+) {
+
+    const pill =
+        document.getElementById(
+            "connectionPill"
+        );
+
+
+    const pillDot =
+        pill.querySelector(
+            ".dot"
+        );
+
+
+    const pillText =
+        pill.querySelector(
+            "span:last-child"
+        );
+
+
+    const sideDot =
+        document.getElementById(
+            "sideDot"
+        );
+
+
+    const sideStatus =
+        document.getElementById(
+            "sideStatus"
+        );
+
+
+    pillDot.className =
+        (
+            "dot "
+            +
+            (
+                online
+                ? "online"
+                : "offline"
+            )
+        );
+
+
+    sideDot.className =
+        pillDot.className;
+
+
+    pillText.textContent =
+        online
+        ? "Server Online"
+        : "Connection Lost";
+
+
+    sideStatus.textContent =
+        online
+        ? "Server Online"
+        : "Server Offline";
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+function showPage(
+    pageName
+) {
+
+    document
+    .querySelectorAll(
+        ".page"
+    )
+    .forEach(
+        page => {
+
+            page.classList.toggle(
+
+                "active",
+
+                page.dataset.panel
+                === pageName
+
+            );
+
+        }
+    );
+
+
+    document
+    .querySelectorAll(
+        ".nav-item"
+    )
+    .forEach(
+        item => {
+
+            item.classList.toggle(
+
+                "active",
+
+                item.dataset.page
+                === pageName
+
+            );
+
+        }
+    );
+
+
+    document
+    .getElementById(
+        "pageTitle"
+    )
+    .textContent =
+        PAGE_NAMES[
+            pageName
+        ]
+        ||
+        "PrioWay";
+
+
+    if (
+        window.innerWidth
+        <
+        980
+    ) {
+
+        document
+        .getElementById(
+            "sidebar"
+        )
+        .classList
+        .remove(
+            "open"
+        );
+
+    }
+
+
+    setTimeout(
+        () => {
+
+            overviewMap
+                ?.invalidateSize();
+
+            mainMap
+                ?.invalidateSize();
+
+        },
+        160
+    );
+
+}
+
+
+/* =====================================================
+   MAPS
+===================================================== */
+
+const overviewMap =
+    L.map(
+        "overviewMap",
+        {
+            zoomControl:
+                false
+        }
+    )
+    .setView(
+        [
+            28.68,
+            77.17
+        ],
+        11
+    );
+
+
+const mainMap =
+    L.map(
+        "mainMap"
+    )
+    .setView(
+        [
+            28.68,
+            77.17
+        ],
+        11
+    );
+
+
+const tiles =
+
+    "https://tile.openstreetmap.org/"
+    +
+    "{z}/{x}/{y}.png";
+
+
+const tileOptions = {
+
+    maxZoom:
+        19,
+
+    attribution:
+        "&copy; OpenStreetMap contributors"
+
+};
+
+
+L.tileLayer(
+    tiles,
+    tileOptions
+)
+.addTo(
+    overviewMap
+);
+
+
+L.tileLayer(
+    tiles,
+    tileOptions
+)
+.addTo(
+    mainMap
+);
+
+
+L.control.zoom({
+
+    position:
+        "bottomright"
+
+})
+.addTo(
+    overviewMap
+);
+
+
+let overviewLayers =
+    [];
+
+
+let mainLayers =
+    [];
+
+
+let overviewRoute =
+    null;
+
+
+let mainRoute =
+    null;
+
+
+/* =====================================================
+   MARKERS
+===================================================== */
+
+function markerIcon(
+    type,
+    source,
+    health
+) {
+
+    const simulated =
+
+        String(source)
+        .toUpperCase()
+        === "SIMULATED"
+
+        ? " simulated"
+        : "";
+
+
+    const failed =
+
+        [
+            "OFFLINE",
+            "FAILED"
+        ]
+        .includes(
+            String(health)
+            .toUpperCase()
+        )
+
+        ? " failed"
+        : "";
+
+
+    return L.divIcon({
+
+        className:
+            "",
+
+        html: `
+
+            <div
+                class="
+                    custom-marker
+                    ${type}
+                    ${simulated}
+                    ${failed}
+                "
+            ></div>
+
+        `,
+
+        iconSize:
+            [22,22],
+
+        iconAnchor:
+            [11,11]
+
+    });
+
+}
+
+
+function clearMarkers() {
+
+    overviewLayers
+    .forEach(
+        layer => {
+
+            try {
+
+                overviewMap
+                    .removeLayer(
+                        layer
+                    );
+
+            }
+            catch (_) {}
+
+        }
+    );
+
+
+    mainLayers
+    .forEach(
+        layer => {
+
+            try {
+
+                mainMap
+                    .removeLayer(
+                        layer
+                    );
+
+            }
+            catch (_) {}
+
+        }
+    );
+
+
+    overviewLayers =
+        [];
+
+
+    mainLayers =
+        [];
+
+}
+
+
+function renderMarkers() {
+
+    clearMarkers();
+
+
+    const points =
+        [];
+
+
+    function add(
+        lat,
+        lon,
+        icon,
+        popup
+    ) {
+
+        if (
+            lat === null
+            ||
+            lat === undefined
+            ||
+            lon === null
+            ||
+            lon === undefined
+        ) {
+
+            return;
+
+        }
+
+
+        const markerA =
+
+            L.marker(
+                [lat,lon],
+                {
+                    icon:
+                        icon
+                }
+            )
+
+            .addTo(
+                overviewMap
+            )
+
+            .bindPopup(
+                popup
+            );
+
+
+        const markerB =
+
+            L.marker(
+                [lat,lon],
+                {
+                    icon:
+                        icon
+                }
+            )
+
+            .addTo(
+                mainMap
+            )
+
+            .bindPopup(
+                popup
+            );
+
+
+        overviewLayers.push(
+            markerA
+        );
+
+
+        mainLayers.push(
+            markerB
+        );
+
+
+        points.push(
+            [lat,lon]
+        );
+
+    }
+
+
+    APP.vehicles
+    .forEach(
+        vehicle => {
+
+            const location =
+                vehicle.location
+                ||
+                {};
+
+
+            if (
+                !location.valid
+            ) {
+
+                return;
+
+            }
+
+
+            add(
+
+                location.lat,
+
+                location.lon,
+
+                markerIcon(
+
+                    "vehicle",
+
+                    vehicle.source,
+
+                    vehicle.online
+                    ? "ONLINE"
+                    : "OFFLINE"
+
+                ),
+
+                `
+
+                <b>
+                    ${escapeHTML(
+                        vehicle.vehicle_id
+                    )}
+                </b>
+
+                <br>
+
+                ${escapeHTML(
+                    vehicle.name
+                )}
+
+                <br>
+
+                ${
+                    vehicle.source
+                    === "SIMULATED"
+                    ? "SIMULATED"
+                    : "PHYSICAL"
+                }
+
+                `
+
+            );
+
+        }
+    );
+
+
+    APP.junctions
+    .forEach(
+        junction => {
+
+            const health =
+                junction.health
+                ?.status
+                ||
+                "OFFLINE";
+
+
+            add(
+
+                junction.lat,
+
+                junction.lon,
+
+                markerIcon(
+
+                    "junction",
+
+                    junction.source,
+
+                    health
+
+                ),
+
+                `
+
+                <b>
+                    ${escapeHTML(
+                        junction.junction_id
+                    )}
+                </b>
+
+                <br>
+
+                ${escapeHTML(
+                    junction.name
+                )}
+
+                <br>
+
+                Health:
+                ${escapeHTML(
+                    health
+                )}
+
+                <br>
+
+                Signal:
+                ${escapeHTML(
+                    lightName(
+                        junction.current_light
+                    )
+                )}
+
+                `
+
+            );
+
+        }
+    );
+
+
+    APP.hospitals
+    .forEach(
+        hospital => {
+
+            add(
+
+                hospital.lat,
+
+                hospital.lon,
+
+                markerIcon(
+                    "hospital",
+                    "PHYSICAL",
+                    "ONLINE"
+                ),
+
+                `
+
+                <b>
+                    ${escapeHTML(
+                        hospital.name
+                    )}
+                </b>
+
+                <br>
+
+                ${escapeHTML(
+                    hospital.hospital_id
+                )}
+
+                `
+
+            );
+
+        }
+    );
+
+
+    if (
+        points.length
+    ) {
+
+        const bounds =
+            L.latLngBounds(
+                points
+            );
+
+
+        overviewMap
+        .fitBounds(
+            bounds,
+            {
+                padding:
+                    [35,35],
+
+                maxZoom:
+                    13
+            }
+        );
+
+
+        if (
+            !APP.route
+        ) {
+
+            mainMap
+            .fitBounds(
+                bounds,
+                {
+                    padding:
+                        [45,45],
+
+                    maxZoom:
+                        12
+                }
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   OVERVIEW
+===================================================== */
+
+function renderOverview() {
+
+    const prioway =
+        APP.status
+        ?.prioway
+        ||
+        {};
+
+
+    const active =
+        APP.requests
+        .filter(
+            item =>
+
+                [
+                    "PENDING",
+                    "VERIFIED",
+                    "APPROVED",
+                    "ACTIVATING",
+                    "ACTIVE",
+                    "FLAGGED"
+                ]
+                .includes(
+                    item.status
+                )
+
+        );
+
+
+    document
+    .getElementById(
+        "vehicleMetric"
+    )
+    .textContent =
+
+        prioway.vehicles_total
+        ??
+        APP.vehicles.length;
+
+
+    document
+    .getElementById(
+        "junctionMetric"
+    )
+    .textContent =
+
+        prioway.junctions_total
+        ??
+        APP.junctions.length;
+
+
+    document
+    .getElementById(
+        "requestMetric"
+    )
+    .textContent =
+        active.length;
+
+
+    document
+    .getElementById(
+        "requestCountNav"
+    )
+    .textContent =
+        active.length;
+
+
+    document
+    .getElementById(
+        "unhealthyMetric"
+    )
+    .textContent =
+
+        prioway.unhealthy_junctions
+        ??
+        0;
+
+
+    document
+    .getElementById(
+        "heroState"
+    )
+    .textContent =
+
+        active.length
+
+        ? (
+            active.length
+            +
+            " ACTIVE EMERGENCY "
+            +
+            (
+                active.length === 1
+                ? "REQUEST"
+                : "REQUESTS"
+            )
+        )
+
+        : "NETWORK READY";
+
+
+    document
+    .getElementById(
+        "heroCopy"
+    )
+    .textContent =
+
+        active.length
+
+        ?
+        (
+            "PrioWay is actively monitoring emergency "
+            +
+            "requests, vehicle verification and "
+            +
+            "junction availability."
+        )
+
+        :
+        (
+            "PrioWay is monitoring the mobility network "
+            +
+            "and waiting for the next priority request."
+        );
+
+
+    const stateName =
+        APP.status
+        ?.state
+        ||
+        "NORMAL";
+
+
+    const badgeElement =
+        document.getElementById(
+            "systemStateBadge"
+        );
+
+
+    badgeElement.textContent =
+        stateName
+        .replaceAll(
+            "_",
+            " "
+        );
+
+
+    badgeElement.className =
+
+        (
+            "badge "
+            +
+            statusStyle(
+                stateName
+            )
+        );
+
+
+    const healthy =
+
+        APP.junctions
+        .filter(
+            item =>
+
+                item.health
+                ?.status
+                === "ONLINE"
+
+        )
+        .length;
+
+
+    document
+    .getElementById(
+        "healthyJunctions"
+    )
+    .textContent =
+
+        (
+            healthy
+            +
+            "/"
+            +
+            APP.junctions.length
+        );
+
+
+    document
+    .getElementById(
+        "healthProgress"
+    )
+    .style.width =
+
+        APP.junctions.length
+
+        ?
+        (
+            healthy
+            /
+            APP.junctions.length
+            *
+            100
+        )
+        +
+        "%"
+
+        :
+        "0%";
+
+
+    const environmental =
+
+        APP.junctions
+        .find(
+            item =>
+                item.source
+                === "PHYSICAL"
+        )
+
+        ||
+
+        APP.junctions[
+            0
+        ];
+
+
+    if (
+        environmental
+    ) {
+
+        const gas =
+            environmental.gas
+            ||
+            {};
+
+
+        document
+        .getElementById(
+            "gasOverview"
+        )
+        .textContent =
+
+            (
+                gas.status
+                ||
+                "UNKNOWN"
+            )
+
+            +
+
+            (
+                gas.source
+                === "SIMULATED"
+
+                ? " · SIM"
+                : ""
+            );
+
+
+        const temp =
+            environmental.temperature
+            ||
+            {};
+
+
+        document
+        .getElementById(
+            "tempOverview"
+        )
+        .textContent =
+
+            temp.value
+            !== null
+            &&
+            temp.value
+            !== undefined
+
+            ?
+            (
+                Number(
+                    temp.value
+                )
+                .toFixed(1)
+
+                +
+                "°C"
+
+                +
+
+                (
+                    temp.source
+                    === "SIMULATED"
+
+                    ? " · SIM"
+                    : ""
+                )
+            )
+
+            :
+            "Unavailable";
+
+    }
+
+
+    const securityEvents =
+
+        APP.events
+        .filter(
+            event => {
+
+                const severity =
+                    String(
+                        event.severity
+                        ||
+                        ""
+                    )
+                    .toUpperCase();
+
+
+                const type =
+                    String(
+                        event.event_type
+                        ||
+                        ""
+                    )
+                    .toUpperCase();
+
+
+                return (
+
+                    severity
+                    === "SECURITY"
+
+                    ||
+
+                    type.includes(
+                        "BLOCK"
+                    )
+
+                    ||
+
+                    type.includes(
+                        "UNKNOWN"
+                    )
+
+                    ||
+
+                    type.includes(
+                        "FAKE"
+                    )
+
+                );
+
+            }
+        )
+        .length;
+
+
+    document
+    .getElementById(
+        "securityEvents"
+    )
+    .textContent =
+        securityEvents;
+
+
+    document
+    .getElementById(
+        "overviewRequests"
+    )
+    .innerHTML =
+
+        active.length
+
+        ?
+        active
+        .slice(
+            0,
+            4
+        )
+        .map(
+            request => `
+
+                <div class="request-mini">
+
+                    <div class="request-mini-top">
+
+                        <strong>
+                            ${escapeHTML(
+                                request.request_id
+                                ||
+                                "REQUEST"
+                            )}
+                        </strong>
+
+                        ${
+                            badge(
+                                request.status
+                            )
+                        }
+
+                    </div>
+
+                    <div class="request-mini-meta">
+
+                        ${escapeHTML(
+                            request.vehicle_id
+                        )}
+
+                        ·
+
+                        ${escapeHTML(
+                            request.verification_status
+                        )}
+
+                        ·
+
+                        ${escapeHTML(
+                            request.priority
+                        )}
+
+                    </div>
+
+                </div>
+
+            `
+        )
+        .join("")
+
+        :
+        `
+
+        <div class="empty">
+            No active emergency requests.
+        </div>
+
+        `;
+
+
+    document
+    .getElementById(
+        "overviewEvents"
+    )
+    .innerHTML =
+
+        APP.events.length
+
+        ?
+        APP.events
+        .slice(
+            0,
+            6
+        )
+        .map(
+            eventHTML
+        )
+        .join("")
+
+        :
+        `
+
+        <div class="empty">
+            No events recorded yet.
+        </div>
+
+        `;
+
+}
+
+
+/* =====================================================
+   VEHICLES
+===================================================== */
+
+function renderVehicles() {
+
+    const grid =
+        document.getElementById(
+            "vehicleGrid"
+        );
+
+
+    grid.innerHTML =
+
+        APP.vehicles
+        .map(
+            vehicle => `
+
+            <article class="entity-card">
+
+                <div class="entity-head">
+
+                    <div>
+
+                        <h3>
+                            ${escapeHTML(
+                                vehicle.vehicle_id
+                            )}
+                        </h3>
+
+                        <div class="entity-sub">
+                            ${escapeHTML(
+                                vehicle.name
+                            )}
+                        </div>
+
+                    </div>
+
+                    ${
+                        sourceBadge(
+                            vehicle.source
+                        )
+                    }
+
+                </div>
+
+
+                <div
+                    style="
+                        margin-top:12px;
+                        display:flex;
+                        gap:7px;
+                        flex-wrap:wrap
+                    "
+                >
+
+                    ${
+                        vehicle.verified
+
+                        ? badge(
+                            "VERIFIED",
+                            "success"
+                        )
+
+                        : badge(
+                            "UNVERIFIED",
+                            "warning"
+                        )
+                    }
+
+                    ${
+                        vehicle.blacklisted
+
+                        ? badge(
+                            "BLACKLISTED",
+                            "danger"
+                        )
+
+                        : ""
+                    }
+
+                    ${
+                        badge(
+                            vehicle.online
+                            ? "ONLINE"
+                            : "OFFLINE"
+                        )
+                    }
+
+                </div>
+
+
+                <div class="entity-data">
+
+                    <div>
+
+                        <small>
+                            Registration
+                        </small>
+
+                        <strong>
+                            ${escapeHTML(
+                                vehicle.registration_number
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Hospital
+                        </small>
+
+                        <strong>
+                            ${escapeHTML(
+                                vehicle.hospital_id
+                                ||
+                                "—"
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Completed
+                        </small>
+
+                        <strong>
+                            ${
+                                vehicle.history
+                                ?.completed_requests
+                                ??
+                                0
+                            }
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Rejected
+                        </small>
+
+                        <strong>
+                            ${
+                                vehicle.history
+                                ?.rejected_requests
+                                ??
+                                0
+                            }
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Suspicious
+                        </small>
+
+                        <strong>
+                            ${
+                                vehicle.history
+                                ?.suspicious_requests
+                                ??
+                                0
+                            }
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Duplicates
+                        </small>
+
+                        <strong>
+                            ${
+                                vehicle.history
+                                ?.duplicate_requests
+                                ??
+                                0
+                            }
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="entity-actions">
+
+                    <button
+                        class="small-button routeVehicle"
+                        data-id="${escapeHTML(
+                            vehicle.vehicle_id
+                        )}"
+                    >
+                        Route
+                    </button>
+
+
+                    ${
+                        vehicle.blacklisted
+
+                        ?
+                        `
+
+                        <button
+                            class="
+                                small-button
+                                green
+                                restoreVehicle
+                            "
+                            data-id="${escapeHTML(
+                                vehicle.vehicle_id
+                            )}"
+                        >
+                            Restore
+                        </button>
+
+                        `
+
+                        :
+                        `
+
+                        <button
+                            class="
+                                small-button
+                                red
+                                blacklistVehicle
+                            "
+                            data-id="${escapeHTML(
+                                vehicle.vehicle_id
+                            )}"
+                        >
+                            Blacklist
+                        </button>
+
+                        `
+                    }
+
+                </div>
+
+            </article>
+
+            `
+        )
+        .join("");
+
+
+    document
+    .querySelectorAll(
+        ".blacklistVehicle"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const reason =
+                        prompt(
+
+                            "Reason for blacklisting "
+                            +
+                            button.dataset.id,
+
+                            "Repeated false or suspicious requests"
+
+                        );
+
+
+                    if (
+                        reason === null
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        await apiPost(
+
+                            API
+                            +
+                            "/vehicles/"
+                            +
+                            encodeURIComponent(
+                                button.dataset.id
+                            )
+                            +
+                            "/blacklist",
+
+                            {
+                                reason:
+                                    reason
+                            }
+
+                        );
+
+
+                        toast(
+
+                            "Vehicle blacklisted",
+
+                            button.dataset.id
+
+                        );
+
+
+                        await refreshAll();
+
+                    }
+
+                    catch (
+                        error
+                    ) {
+
+                        toast(
+                            "Blacklist failed",
+                            error.message,
+                            true
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    document
+    .querySelectorAll(
+        ".restoreVehicle"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    try {
+
+                        await apiPost(
+
+                            API
+                            +
+                            "/vehicles/"
+                            +
+                            encodeURIComponent(
+                                button.dataset.id
+                            )
+                            +
+                            "/restore"
+
+                        );
+
+
+                        toast(
+
+                            "Vehicle restored",
+
+                            button.dataset.id
+
+                        );
+
+
+                        await refreshAll();
+
+                    }
+
+                    catch (
+                        error
+                    ) {
+
+                        toast(
+                            "Restore failed",
+                            error.message,
+                            true
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    document
+    .querySelectorAll(
+        ".routeVehicle"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    showPage(
+                        "map"
+                    );
+
+
+                    document
+                    .getElementById(
+                        "routeVehicle"
+                    )
+                    .value =
+                        button.dataset.id;
+
+
+                    updateStartVisibility();
+
+                }
+            );
+
+        }
+    );
+
+
+    const selector =
+        document.getElementById(
+            "routeVehicle"
+        );
+
+
+    const previous =
+        selector.value;
+
+
+    selector.innerHTML =
+
+        `
+
+        <option value="">
+            Manual Start
+        </option>
+
+        `
+
+        +
+
+        APP.vehicles
+
+        .filter(
+            vehicle =>
+                vehicle.location
+                ?.valid
+        )
+
+        .map(
+            vehicle => `
+
+                <option
+                    value="${escapeHTML(
+                        vehicle.vehicle_id
+                    )}"
+                >
+                    ${escapeHTML(
+                        vehicle.vehicle_id
+                    )}
+                    —
+                    ${escapeHTML(
+                        vehicle.name
+                    )}
+                </option>
+
+            `
+        )
+
+        .join("");
+
+
+    if (
+        [
+            ...selector.options
+        ]
+        .some(
+            option =>
+                option.value
+                === previous
+        )
+    ) {
+
+        selector.value =
+            previous;
+
+    }
+
+}
+
+
+/* =====================================================
+   JUNCTIONS
+===================================================== */
+
+function renderJunctions() {
+
+    document
+    .getElementById(
+        "junctionGrid"
+    )
+    .innerHTML =
+
+        APP.junctions
+        .map(
+            junction => {
+
+                const health =
+                    junction.health
+                    ?.status
+                    ||
+                    "OFFLINE";
+
+
+                const temperature =
+
+                    junction.temperature
+                    ?.value
+                    !== null
+                    &&
+                    junction.temperature
+                    ?.value
+                    !== undefined
+
+                    ?
+                    (
+                        Number(
+                            junction.temperature.value
+                        )
+                        .toFixed(1)
+                        +
+                        "°C"
+                    )
+
+                    :
+                    "Unavailable";
+
+
+                return `
+
+                <article class="entity-card">
+
+                    <div class="entity-head">
+
+                        <div>
+
+                            <h3>
+                                ${escapeHTML(
+                                    junction.junction_id
+                                )}
+                            </h3>
+
+                            <div class="entity-sub">
+                                ${escapeHTML(
+                                    junction.name
+                                )}
+                            </div>
+
+                        </div>
+
+                        ${
+                            sourceBadge(
+                                junction.source
+                            )
+                        }
+
+                    </div>
+
+
+                    <div
+                        style="
+                            margin-top:12px;
+                            display:flex;
+                            gap:7px;
+                            flex-wrap:wrap
+                        "
+                    >
+
+                        ${
+                            badge(
+                                health
+                            )
+                        }
+
+                        ${
+                            badge(
+                                lightName(
+                                    junction.current_light
+                                )
+                            )
+                        }
+
+                    </div>
+
+
+                    <div class="entity-data">
+
+                        <div>
+
+                            <small>
+                                Corridor
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    junction.corridor_state
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Heartbeat
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    ageText(
+                                        junction.health
+                                        ?.age_seconds
+                                    )
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Gas
+                            </small>
+
+                            <strong>
+
+                                ${escapeHTML(
+                                    junction.gas
+                                    ?.value
+                                    ??
+                                    "—"
+                                )}
+
+                                ·
+
+                                ${escapeHTML(
+                                    junction.gas
+                                    ?.status
+                                    ||
+                                    "UNKNOWN"
+                                )}
+
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Gas Source
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    junction.gas
+                                    ?.source
+                                    ||
+                                    "—"
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Temperature
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    temperature
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Temp Source
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    junction.temperature
+                                    ?.source
+                                    ||
+                                    "—"
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Camera
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    junction.camera
+                                    ?.status
+                                    ||
+                                    "UNAVAILABLE"
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Location
+                            </small>
+
+                            <strong>
+
+                                ${Number(
+                                    junction.lat
+                                ).toFixed(3)}
+
+                                ,
+
+                                ${Number(
+                                    junction.lon
+                                ).toFixed(3)}
+
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="health-bar">
+
+                        <span class="${escapeHTML(
+                            health
+                        )}"></span>
+
+                    </div>
+
+                </article>
+
+                `;
+
+            }
+        )
+
+        .join("");
+
+}
+
+
+/* =====================================================
+   REQUESTS
+===================================================== */
+
+function renderRequests() {
+
+    const grid =
+        document.getElementById(
+            "requestGrid"
+        );
+
+
+    if (
+        !APP.requests.length
+    ) {
+
+        grid.innerHTML = `
+
+            <div class="empty">
+                No emergency requests recorded.
+                Use the physical vehicle or Demo Mode.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    grid.innerHTML =
+
+        APP.requests
+        .map(
+            request => {
+
+                const canApprove =
+
+                    [
+                        "PENDING",
+                        "FLAGGED"
+                    ]
+                    .includes(
+                        request.status
+                    );
+
+
+                const canReject =
+
+                    ![
+                        "REJECTED",
+                        "COMPLETED",
+                        "BLOCKED"
+                    ]
+                    .includes(
+                        request.status
+                    );
+
+
+                const canResolve =
+
+                    [
+                        "APPROVED",
+                        "ACTIVATING",
+                        "ACTIVE"
+                    ]
+                    .includes(
+                        request.status
+                    );
+
+
+                return `
+
+                <article class="entity-card">
+
+                    <div class="entity-head">
+
+                        <div>
+
+                            <h3>
+                                ${escapeHTML(
+                                    request.request_id
+                                    ||
+                                    "REQUEST"
+                                )}
+                            </h3>
+
+                            <div class="entity-sub">
+
+                                ${escapeHTML(
+                                    request.vehicle_id
+                                )}
+
+                                →
+
+                                ${escapeHTML(
+                                    request.hospital_id
+                                    ||
+                                    "No hospital"
+                                )}
+
+                            </div>
+
+                        </div>
+
+                        ${
+                            badge(
+                                request.status
+                            )
+                        }
+
+                    </div>
+
+
+                    <div class="entity-data">
+
+                        <div>
+
+                            <small>
+                                Verification
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    request.verification_status
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Priority
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    request.priority
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Junction
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    request.junction_id
+                                    ||
+                                    "Automatic"
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Source
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    request.source
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Created
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    formatDate(
+                                        request.created_at
+                                    )
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Approved
+                            </small>
+
+                            <strong>
+                                ${escapeHTML(
+                                    formatDate(
+                                        request.approved_at
+                                    )
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="entity-actions">
+
+
+                        ${
+                            canApprove
+                            ?
+                            `
+
+                            <button
+                                class="
+                                    small-button
+                                    green
+                                    requestAction
+                                "
+                                data-id="${escapeHTML(
+                                    request.request_id
+                                )}"
+                                data-action="approve"
+                            >
+                                Approve
+                            </button>
+
+                            `
+                            :
+                            ""
+                        }
+
+
+                        ${
+                            canReject
+                            ?
+                            `
+
+                            <button
+                                class="
+                                    small-button
+                                    red
+                                    requestAction
+                                "
+                                data-id="${escapeHTML(
+                                    request.request_id
+                                )}"
+                                data-action="reject"
+                            >
+                                Reject
+                            </button>
+
+                            `
+                            :
+                            ""
+                        }
+
+
+                        ${
+                            canResolve
+                            ?
+                            `
+
+                            <button
+                                class="
+                                    small-button
+                                    requestAction
+                                "
+                                data-id="${escapeHTML(
+                                    request.request_id
+                                )}"
+                                data-action="resolve"
+                            >
+                                Resolve
+                            </button>
+
+                            `
+                            :
+                            ""
+                        }
+
+
+                    </div>
+
+                </article>
+
+                `;
+
+            }
+        )
+        .join("");
+
+
+    document
+    .querySelectorAll(
+        ".requestAction"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    try {
+
+                        await apiPost(
+
+                            API
+                            +
+                            "/requests/"
+                            +
+                            encodeURIComponent(
+                                button.dataset.id
+                            )
+                            +
+                            "/"
+                            +
+                            button.dataset.action
+
+                        );
+
+
+                        toast(
+
+                            "Request updated",
+
+                            button.dataset.id
+                            +
+                            " → "
+                            +
+                            button.dataset.action
+                            .toUpperCase()
+
+                        );
+
+
+                        await refreshAll();
+
+                    }
+
+                    catch (
+                        error
+                    ) {
+
+                        toast(
+                            "Request action failed",
+                            error.message,
+                            true
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   HOSPITALS
+===================================================== */
+
+async function renderHospitals() {
+
+    const results =
+
+        await Promise.all(
+
+            APP.hospitals
+            .map(
+                async hospital => {
+
+                    try {
+
+                        const data =
+
+                            await apiGet(
+
+                                API
+                                +
+                                "/hospitals/"
+                                +
+                                encodeURIComponent(
+                                    hospital.hospital_id
+                                )
+                                +
+                                "/incoming"
+
+                            );
+
+
+                        return {
+
+                            hospital:
+                                hospital,
+
+                            requests:
+                                data.requests
+                                ||
+                                []
+
+                        };
+
+                    }
+
+                    catch (_) {
+
+                        return {
+
+                            hospital:
+                                hospital,
+
+                            requests:
+                                []
+
+                        };
+
+                    }
+
+                }
+            )
+
+        );
+
+
+    document
+    .getElementById(
+        "hospitalGrid"
+    )
+    .innerHTML =
+
+        results
+        .map(
+            item => {
+
+                const hospital =
+                    item.hospital;
+
+
+                const requests =
+                    item.requests;
+
+
+                return `
+
+                <article class="hospital-card glass">
+
+
+                    <div class="entity-head">
+
+                        <div>
+
+                            <h3>
+                                ${escapeHTML(
+                                    hospital.name
+                                )}
+                            </h3>
+
+                            <div class="entity-sub">
+                                ${escapeHTML(
+                                    hospital.hospital_id
+                                )}
+                            </div>
+
+                        </div>
+
+                        ${
+                            badge(
+                                hospital.emergency_available
+                                ? "EMERGENCY READY"
+                                : "UNAVAILABLE",
+                                hospital.emergency_available
+                                ? "success"
+                                : "danger"
+                            )
+                        }
+
+                    </div>
+
+
+                    <div class="entity-data">
+
+                        <div>
+
+                            <small>
+                                Incoming
+                            </small>
+
+                            <strong>
+                                ${requests.length}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Location
+                            </small>
+
+                            <strong>
+
+                                ${Number(
+                                    hospital.lat
+                                ).toFixed(3)}
+
+                                ,
+
+                                ${Number(
+                                    hospital.lon
+                                ).toFixed(3)}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="incoming-list">
+
+
+                        ${
+                            requests.length
+
+                            ?
+                            requests
+                            .map(
+                                request => `
+
+                                <div class="incoming">
+
+                                    <div>
+
+                                        <strong>
+                                            ${escapeHTML(
+                                                request.vehicle_id
+                                            )}
+                                        </strong>
+
+                                        <div class="entity-sub">
+                                            ${escapeHTML(
+                                                request.request_id
+                                            )}
+                                        </div>
+
+                                    </div>
+
+                                    ${
+                                        badge(
+                                            request.status
+                                        )
+                                    }
+
+                                </div>
+
+                                `
+                            )
+                            .join("")
+
+                            :
+                            `
+
+                            <div class="empty">
+                                No incoming emergency vehicle.
+                            </div>
+
+                            `
+                        }
+
+
+                    </div>
+
+
+                </article>
+
+                `;
+
+            }
+        )
+        .join("");
+
+}
+
+
+/* =====================================================
+   CAMERAS
+===================================================== */
+
+function renderCameras() {
+
+    document
+    .getElementById(
+        "cameraGrid"
+    )
+    .innerHTML =
+
+        APP.junctions
+        .map(
+            (
+                junction,
+                index
+            ) => {
+
+                const available =
+
+                    ![
+                        "UNAVAILABLE",
+                        "OFFLINE"
+                    ]
+                    .includes(
+                        String(
+                            junction.camera
+                            ?.status
+                            ||
+                            ""
+                        )
+                        .toUpperCase()
+                    );
+
+
+                const traffic =
+
+                    !available
+
+                    ? "NO FEED"
+
+                    :
+                    (
+                        index % 3 === 0
+
+                        ? "LOW"
+
+                        :
+                        (
+                            index % 3 === 1
+
+                            ? "MODERATE"
+
+                            : "HIGH"
+                        )
+                    );
+
+
+                const vehicles =
+
+                    available
+
+                    ?
+                    (
+                        6
+                        +
+                        index * 5
+                        +
+                        Number(
+                            junction.current_light
+                            ||
+                            0
+                        )
+                    )
+
+                    :
+                    0;
+
+
+                return `
+
+                <article class="camera-card">
+
+
+                    <div class="camera-view">
+
+                        <div class="camera-scan"></div>
+
+
+                        <div class="camera-top">
+
+                            ${
+                                badge(
+                                    junction.junction_id,
+                                    "neutral"
+                                )
+                            }
+
+                            ${
+                                badge(
+                                    available
+                                    ? "FEED ACTIVE"
+                                    : "UNAVAILABLE",
+                                    available
+                                    ? "success"
+                                    : "danger"
+                                )
+                            }
+
+                        </div>
+
+
+                        <div class="camera-bottom">
+
+                            ${
+                                sourceBadge(
+                                    junction.camera
+                                    ?.source
+                                    ||
+                                    junction.source
+                                )
+                            }
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="camera-body">
+
+
+                        <div class="entity-head">
+
+                            <div>
+
+                                <h3>
+                                    ${escapeHTML(
+                                        junction.name
+                                    )}
+                                </h3>
+
+                                <div class="entity-sub">
+                                    ${escapeHTML(
+                                        junction.camera
+                                        ?.status
+                                        ||
+                                        "UNAVAILABLE"
+                                    )}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="analysis-grid">
+
+                            <div>
+
+                                <small>
+                                    Traffic
+                                </small>
+
+                                <strong>
+                                    ${escapeHTML(
+                                        traffic
+                                    )}
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <small>
+                                    Vehicles
+                                </small>
+
+                                <strong>
+                                    ${vehicles}
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <small>
+                                    Analysis
+                                </small>
+
+                                <strong>
+
+                                    ${
+                                        junction.camera
+                                        ?.source
+                                        === "SIMULATED"
+
+                                        ?
+                                        "SIMULATED"
+
+                                        :
+                                        "WAITING REAL FEED"
+                                    }
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                </article>
+
+                `;
+
+            }
+        )
+        .join("");
+
+}
+
+
+/* =====================================================
+   EVIDENCE
+===================================================== */
+
+function renderEvidence() {
+
+    const grid =
+        document.getElementById(
+            "evidenceGrid"
+        );
+
+
+    if (
+        !APP.evidence.length
+    ) {
+
+        grid.innerHTML = `
+
+        <div class="empty">
+            No evidence has been uploaded yet.
+        </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    grid.innerHTML =
+
+        APP.evidence
+        .map(
+            evidence => `
+
+            <article class="evidence-card">
+
+                <div class="evidence-preview">
+
+                    ${escapeHTML(
+                        evidence.evidence_type
+                        ||
+                        "EVIDENCE"
+                    )}
+
+                </div>
+
+
+                <div class="evidence-body">
+
+                    <h3>
+                        ${escapeHTML(
+                            evidence.evidence_id
+                            ||
+                            "Evidence"
+                        )}
+                    </h3>
+
+                    <p>
+                        ${escapeHTML(
+                            evidence.description
+                            ||
+                            "No description"
+                        )}
+                    </p>
+
+                    <p>
+
+                        ${escapeHTML(
+                            evidence.vehicle_id
+                            ||
+                            "—"
+                        )}
+
+                        ·
+
+                        ${escapeHTML(
+                            evidence.junction_id
+                            ||
+                            "—"
+                        )}
+
+                    </p>
+
+                    <p>
+                        ${escapeHTML(
+                            formatDate(
+                                evidence.created_at
+                            )
+                        )}
+                    </p>
+
+                </div>
+
+            </article>
+
+            `
+        )
+        .join("");
+
+}
+
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+function eventHTML(
+    event
+) {
+
+    const severity =
+        String(
+            event.severity
+            ||
+            "INFO"
+        )
+        .toUpperCase();
+
+
+    return `
+
+    <div class="event-item">
+
+        <span
+            class="
+                event-dot
+                ${escapeHTML(
+                    severity
+                )}
+            "
+        ></span>
+
+
+        <div>
+
+            <div class="event-title">
+                ${escapeHTML(
+                    event.event_type
+                )}
+            </div>
+
+            <div class="event-description">
+                ${escapeHTML(
+                    event.details
+                )}
+            </div>
+
+        </div>
+
+
+        <div class="event-time">
+            ${escapeHTML(
+                formatDate(
+                    event.timestamp
+                )
+            )}
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+
+function renderEvents() {
+
+    document
+    .getElementById(
+        "eventTimeline"
+    )
+    .innerHTML =
+
+        APP.events.length
+
+        ?
+        APP.events
+        .map(
+            eventHTML
+        )
+        .join("")
+
+        :
+        `
+
+        <div class="empty">
+            No events recorded.
+        </div>
+
+        `;
+
+}
+
+
+/* =====================================================
+   TEAM
+===================================================== */
+
+function renderTeam() {
+
+    document
+    .getElementById(
+        "teamGrid"
+    )
+    .innerHTML =
+
+        TEAM
+        .map(
+            (
+                member,
+                index
+            ) => `
+
+            <article class="team-card">
+
+                <div class="team-avatar">
+                    P${index + 1}
+                </div>
+
+                <h3>
+                    ${escapeHTML(
+                        member.name
+                    )}
+                </h3>
+
+                <div class="team-role">
+                    ${escapeHTML(
+                        member.role
+                    )}
+                </div>
+
+                <div class="team-description">
+                    ${escapeHTML(
+                        member.description
+                    )}
+                </div>
+
+            </article>
+
+            `
+        )
+        .join("");
+
+}
+
+
+/* =====================================================
+   ROUTING
+===================================================== */
+
+function updateStartVisibility() {
+
+    const selectedVehicle =
+
+        document
+        .getElementById(
+            "routeVehicle"
+        )
+        .value;
+
+
+    document
+    .getElementById(
+        "manualStart"
+    )
+    .style.display =
+
+        selectedVehicle
+
+        ? "none"
+        : "block";
+
+}
+
+
+async function geocodeOne(
+    text
+) {
+
+    const data =
+
+        await apiGet(
+
+            API
+            +
+            "/geocode?q="
+            +
+            encodeURIComponent(
+                text
+            )
+
+        );
+
+
+    if (
+        !data.results
+        ?.length
+    ) {
+
+        throw new Error(
+            "Location not found."
+        );
+
+    }
+
+
+    return data.results[0];
+
+}
+
+
+async function calculateRoute() {
+
+    const vehicleId =
+
+        document
+        .getElementById(
+            "routeVehicle"
+        )
+        .value;
+
+
+    const startText =
+
+        document
+        .getElementById(
+            "startPlace"
+        )
+        .value
+        .trim();
+
+
+    const destinationText =
+
+        document
+        .getElementById(
+            "destinationPlace"
+        )
+        .value
+        .trim();
+
+
+    const healthAware =
+
+        document
+        .getElementById(
+            "healthAware"
+        )
+        .checked;
+
+
+    const routeMessage =
+
+        document
+        .getElementById(
+            "routeMessage"
+        );
+
+
+    if (
+        !destinationText
+    ) {
+
+        routeMessage
+        .textContent =
+            "Enter a destination.";
+
+        return;
+
+    }
+
+
+    if (
+        !vehicleId
+        &&
+        !startText
+    ) {
+
+        routeMessage
+        .textContent =
+            (
+                "Select a vehicle "
+                +
+                "or enter a start location."
+            );
+
+        return;
+
+    }
+
+
+    const button =
+
+        document
+        .getElementById(
+            "routeButton"
+        );
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Calculating...";
+
+
+    routeMessage
+    .textContent =
+        (
+            "Finding destination and "
+            +
+            "checking junction health..."
+        );
+
+
+    try {
+
+        const destination =
+
+            await geocodeOne(
+                destinationText
+            );
+
+
+        const payload = {
+
+            destination: {
+
+                lat:
+                    destination.lat,
+
+                lon:
+                    destination.lon
+
+            },
+
+            health_aware:
+                healthAware
+
+        };
+
+
+        if (
+            vehicleId
+        ) {
+
+            payload.vehicle_id =
+                vehicleId;
+
+        }
+
+
+        else {
+
+            const start =
+
+                await geocodeOne(
+                    startText
+                );
+
+
+            payload.start = {
+
+                lat:
+                    start.lat,
+
+                lon:
+                    start.lon
+
+            };
+
+        }
+
+
+        const route =
+
+            await apiPost(
+
+                API
+                +
+                "/route",
+
+                payload
+
+            );
+
+
+        APP.route =
+            route;
+
+
+        renderRoute(
+            route
+        );
+
+
+        routeMessage
+        .textContent =
+            "Route calculated successfully.";
+
+
+        toast(
+
+            route.rerouted
+            ?
+            "Route recalculated"
+            :
+            "Route ready",
+
+            route.rerouted
+            ?
+            "An unhealthy junction was avoided."
+            :
+            "Health-aware route is ready."
+
+        );
+
+    }
+
+
+    catch (
+        error
+    ) {
+
+        routeMessage
+        .textContent =
+            error.message;
+
+
+        toast(
+            "Routing failed",
+            error.message,
+            true
+        );
+
+    }
+
+
+    finally {
+
+        button.disabled =
+            false;
+
+
+        button.textContent =
+            "Calculate Route";
+
+    }
+
+}
+
+
+function renderRoute(
+    route
+) {
+
+    document
+    .getElementById(
+        "routeDistance"
+    )
+    .textContent =
+
+        (
+            route.distance_km
+            ??
+            "—"
+        )
+        +
+        " km";
+
+
+    document
+    .getElementById(
+        "routeEta"
+    )
+    .textContent =
+
+        (
+            route.eta_minutes
+            ??
+            "—"
+        )
+        +
+        " min";
+
+
+    document
+    .getElementById(
+        "routeGreenEta"
+    )
+    .textContent =
+
+        (
+            route.green_corridor_eta_minutes
+            ??
+            "—"
+        )
+        +
+        " min";
+
+
+    document
+    .getElementById(
+        "routeSaved"
+    )
+    .textContent =
+
+        (
+            route.estimated_time_saved_minutes
+            ??
+            "—"
+        )
+        +
+        " min";
+
+
+    const alertBox =
+
+        document
+        .getElementById(
+            "routeAlert"
+        );
+
+
+    const avoided =
+
+        route.junction_health
+        ?.avoided_junctions
+        ||
+        [];
+
+
+    const problems =
+
+        route.junction_health
+        ?.problems_detected
+        ||
+        [];
+
+
+    if (
+        route.rerouted
+    ) {
+
+        alertBox.className =
+            "route-alert warning";
+
+
+        alertBox.textContent =
+
+            (
+                "REROUTED — avoided "
+                +
+                (
+                    avoided.join(", ")
+                    ||
+                    "an unhealthy junction"
+                )
+            );
+
+    }
+
+
+    else if (
+        problems.length
+    ) {
+
+        alertBox.className =
+            "route-alert warning";
+
+
+        alertBox.textContent =
+
+            (
+                problems.length
+                +
+                " unhealthy junction warning(s) remain."
+            );
+
+    }
+
+
+    else {
+
+        alertBox.className =
+            "route-alert success";
+
+
+        alertBox.textContent =
+            (
+                "Route is clear of "
+                +
+                "known failed junctions."
+            );
+
+    }
+
+
+    const coordinates =
+
+        route.route
+        ?.coordinates
+        ||
+        [];
+
+
+    const latLngs =
+
+        coordinates
+        .map(
+            coordinate => [
+
+                coordinate[1],
+
+                coordinate[0]
+
+            ]
+        );
+
+
+    if (
+        mainRoute
+    ) {
+
+        mainMap
+        .removeLayer(
+            mainRoute
+        );
+
+    }
+
+
+    if (
+        overviewRoute
+    ) {
+
+        overviewMap
+        .removeLayer(
+            overviewRoute
+        );
+
+    }
+
+
+    mainRoute =
+
+        L.polyline(
+            latLngs,
+            {
+                color:
+                    "#ef1d28",
+
+                weight:
+                    6,
+
+                opacity:
+                    .94
+            }
+        )
+        .addTo(
+            mainMap
+        );
+
+
+    overviewRoute =
+
+        L.polyline(
+            latLngs,
+            {
+                color:
+                    "#ef1d28",
+
+                weight:
+                    4,
+
+                opacity:
+                    .9
+            }
+        )
+        .addTo(
+            overviewMap
+        );
+
+
+    if (
+        latLngs.length
+    ) {
+
+        mainMap
+        .fitBounds(
+
+            mainRoute
+            .getBounds(),
+
+            {
+                padding:
+                    [45,45],
+
+                maxZoom:
+                    14
+            }
+
+        );
+
+
+        overviewMap
+        .fitBounds(
+
+            overviewRoute
+            .getBounds(),
+
+            {
+                padding:
+                    [35,35],
+
+                maxZoom:
+                    13
+            }
+
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   EVIDENCE UPLOAD
+===================================================== */
+
+async function uploadEvidence() {
+
+    const input =
+
+        document
+        .getElementById(
+            "evidenceFile"
+        );
+
+
+    const file =
+        input.files[0];
+
+
+    const message =
+
+        document
+        .getElementById(
+            "uploadMessage"
+        );
+
+
+    if (
+        !file
+    ) {
+
+        message.textContent =
+            "Select a photo or video first.";
+
+        return;
+
+    }
+
+
+    const form =
+
+        new FormData();
+
+
+    form.append(
+        "file",
+        file
+    );
+
+
+    form.append(
+
+        "request_id",
+
+        document
+        .getElementById(
+            "evidenceRequest"
+        )
+        .value
+        .trim()
+
+    );
+
+
+    form.append(
+
+        "vehicle_id",
+
+        document
+        .getElementById(
+            "evidenceVehicle"
+        )
+        .value
+        .trim()
+
+    );
+
+
+    form.append(
+
+        "junction_id",
+
+        document
+        .getElementById(
+            "evidenceJunction"
+        )
+        .value
+        .trim()
+
+    );
+
+
+    form.append(
+
+        "description",
+
+        document
+        .getElementById(
+            "evidenceDescription"
+        )
+        .value
+        .trim()
+
+    );
+
+
+    form.append(
+
+        "type",
+
+        file.type
+        .startsWith(
+            "video/"
+        )
+
+        ? "VIDEO"
+
+        : "PHOTO"
+
+    );
+
+
+    form.append(
+        "source",
+        "WEB"
+    );
+
+
+    try {
+
+        message.textContent =
+            "Uploading...";
+
+
+        const response =
+
+            await fetch(
+
+                API
+                +
+                "/evidence",
+
+                {
+                    method:
+                        "POST",
+
+                    body:
+                        form
+                }
+
+            );
+
+
+        const data =
+
+            await response.json();
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+
+                data.message
+                ||
+                "Upload failed."
+
+            );
+
+        }
+
+
+        message.textContent =
+
+            (
+                "Uploaded as "
+                +
+                data.evidence
+                ?.evidence_id
+            );
+
+
+        input.value =
+            "";
+
+
+        toast(
+            "Evidence uploaded",
+            "Audit event created."
+        );
+
+
+        await refreshAll();
+
+    }
+
+
+    catch (
+        error
+    ) {
+
+        message.textContent =
+            error.message;
+
+
+        toast(
+            "Upload failed",
+            error.message,
+            true
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   DEMO
+===================================================== */
+
+async function runDemo(
+    url
+) {
+
+    try {
+
+        const data =
+            await apiPost(
+                url
+            );
+
+
+        toast(
+
+            "Demo action completed",
+
+            data.message
+            ||
+            data.result
+            ||
+            "Scenario updated."
+
+        );
+
+
+        await refreshAll();
+
+    }
+
+
+    catch (
+        error
+    ) {
+
+        toast(
+            "Demo action failed",
+            error.message,
+            true
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   REFRESH ALL
+===================================================== */
+
+async function refreshAll() {
+
+    try {
+
+        const results =
+
+            await Promise.all([
+
+                apiGet(
+                    API
+                    +
+                    "/status"
+                ),
+
+                apiGet(
+                    API
+                    +
+                    "/vehicles"
+                ),
+
+                apiGet(
+                    API
+                    +
+                    "/junctions"
+                ),
+
+                apiGet(
+                    API
+                    +
+                    "/requests"
+                ),
+
+                apiGet(
+                    API
+                    +
+                    "/hospitals"
+                ),
+
+                apiGet(
+                    API
+                    +
+                    "/events?limit=100"
+                ),
+
+                apiGet(
+                    API
+                    +
+                    "/evidence?limit=100"
+                )
+
+            ]);
+
+
+        APP.status =
+            results[0];
+
+
+        APP.vehicles =
+            results[1]
+            .vehicles
+            ||
+            [];
+
+
+        APP.junctions =
+            results[2]
+            .junctions
+            ||
+            [];
+
+
+        APP.requests =
+            results[3]
+            .requests
+            ||
+            [];
+
+
+        APP.hospitals =
+            results[4]
+            .hospitals
+            ||
+            [];
+
+
+        APP.events =
+            results[5]
+            .events
+            ||
+            [];
+
+
+        APP.evidence =
+            results[6]
+            .evidence
+            ||
+            [];
+
+
+        setConnection(
+            true
+        );
+
+
+        renderOverview();
+
+        renderVehicles();
+
+        renderJunctions();
+
+        renderRequests();
+
+        await renderHospitals();
+
+        renderCameras();
+
+        renderEvidence();
+
+        renderEvents();
+
+        renderMarkers();
+
+    }
+
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            error
+        );
+
+
+        setConnection(
+            false
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   BOOT
+===================================================== */
+
+document
+.querySelectorAll(
+    ".nav-item"
+)
+.forEach(
+    button => {
+
+        button
+        .addEventListener(
+            "click",
+            () => {
+
+                showPage(
+                    button.dataset.page
+                );
+
+            }
+        );
+
+    }
+);
+
+
+document
+.getElementById(
+    "refreshButton"
+)
+.addEventListener(
+    "click",
+    async () => {
+
+        await refreshAll();
+
+        toast(
+            "Dashboard refreshed",
+            "Latest PrioWay data loaded."
+        );
+
+    }
+);
+
+
+document
+.getElementById(
+    "mobileMenu"
+)
+.addEventListener(
+    "click",
+    () => {
+
+        document
+        .getElementById(
+            "sidebar"
+        )
+        .classList
+        .toggle(
+            "open"
+        );
+
+    }
+);
+
+
+document
+.getElementById(
+    "routeVehicle"
+)
+.addEventListener(
+    "change",
+    updateStartVisibility
+);
+
+
+document
+.getElementById(
+    "routeButton"
+)
+.addEventListener(
+    "click",
+    calculateRoute
+);
+
+
+document
+.getElementById(
+    "uploadEvidence"
+)
+.addEventListener(
+    "click",
+    uploadEvidence
+);
+
+
+/* DEMO DRAWER */
+
+const demoDrawer =
+    document.getElementById(
+        "demoDrawer"
+    );
+
+
+const demoBackdrop =
+    document.getElementById(
+        "demoBackdrop"
+    );
+
+
+document
+.getElementById(
+    "demoOpen"
+)
+.addEventListener(
+    "click",
+    () => {
+
+        demoDrawer
+        .classList
+        .add(
+            "open"
+        );
+
+
+        demoBackdrop
+        .classList
+        .add(
+            "open"
+        );
+
+    }
+);
+
+
+function closeDemo() {
+
+    demoDrawer
+    .classList
+    .remove(
+        "open"
+    );
+
+
+    demoBackdrop
+    .classList
+    .remove(
+        "open"
+    );
+
+}
+
+
+document
+.getElementById(
+    "demoClose"
+)
+.addEventListener(
+    "click",
+    closeDemo
+);
+
+
+demoBackdrop
+.addEventListener(
+    "click",
+    closeDemo
+);
+
+
+document
+.querySelectorAll(
+    ".demoAction"
+)
+.forEach(
+    button => {
+
+        button
+        .addEventListener(
+            "click",
+            () => {
+
+                runDemo(
+                    button.dataset.url
+                );
+
+            }
+        );
+
+    }
+);
+
+
+renderTeam();
+
+updateStartVisibility();
+
+refreshAll();
+
+
+/*
+Five seconds is fast enough for the presentation
+without hammering Flask unnecessarily.
+*/
+
+setInterval(
+    refreshAll,
+    5000
+);
+
+
+</script>
+
+
+</body>
+
+</html>
