@@ -438,4 +438,360 @@ class EvidenceService:
         }, 200
 
 
+    # =====================================================
+    # UPDATE MOBILE DEVICE LOCATION
+    # =====================================================
+
+    def update_app_device_location(
+        self,
+        user_id,
+        device_token,
+        lat,
+        lon,
+        accuracy_m=None,
+    ):
+
+        user_id = str(
+            user_id or ""
+        ).strip()
+
+        device_token = str(
+            device_token or ""
+        ).strip()
+
+        if not user_id:
+
+            return {
+                "success": False,
+                "message":
+                    "user_id required",
+            }, 400
+
+        if not device_token:
+
+            return {
+                "success": False,
+                "message":
+                    "device_token required",
+            }, 400
+
+        try:
+
+            lat = float(lat)
+            lon = float(lon)
+
+            if accuracy_m is not None:
+                accuracy_m = float(
+                    accuracy_m
+                )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
+
+            return {
+                "success": False,
+                "message":
+                    "Valid lat/lon required",
+            }, 400
+
+        if not (
+            -90.0 <= lat <= 90.0
+            and
+            -180.0 <= lon <= 180.0
+        ):
+
+            return {
+                "success": False,
+                "message":
+                    "Location outside valid range",
+            }, 400
+
+        now = self._now_iso()
+
+        updated = database_service.execute(
+            """
+            UPDATE app_devices
+            SET
+                user_id = ?,
+                enabled = 1,
+                lat = ?,
+                lon = ?,
+                location_accuracy_m = ?,
+                location_updated_at = ?,
+                updated_at = ?
+            WHERE device_token = ?
+            """,
+            (
+                user_id,
+                lat,
+                lon,
+                accuracy_m,
+                now,
+                now,
+                device_token,
+            ),
+        )
+
+        if not updated:
+
+            database_service.insert(
+                """
+                INSERT INTO app_devices (
+                    user_id,
+                    device_token,
+                    platform,
+                    enabled,
+                    lat,
+                    lon,
+                    location_accuracy_m,
+                    location_updated_at,
+                    created_at,
+                    updated_at
+                )
+                VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    user_id,
+                    device_token,
+                    "android",
+                    lat,
+                    lon,
+                    accuracy_m,
+                    now,
+                    now,
+                    now,
+                ),
+            )
+
+        return {
+            "success": True,
+            "message":
+                "Device location updated",
+            "location": {
+                "lat": lat,
+                "lon": lon,
+                "accuracy_m":
+                    accuracy_m,
+                "updated_at":
+                    now,
+            },
+        }, 200
+
+    # =====================================================
+    # ADMIN EVIDENCE REMOVAL
+    # =====================================================
+
+    def _delete_rows(
+        self,
+        rows,
+    ):
+
+        deleted_ids = []
+
+        evidence_root = os.path.abspath(
+            EVIDENCE_DIR
+        )
+
+        for row in rows:
+
+            relative_path = (
+                row.get("file_path")
+            )
+
+            if relative_path:
+
+                absolute_path = os.path.abspath(
+                    os.path.join(
+                        PROJECT_ROOT,
+                        relative_path,
+                    )
+                )
+
+                try:
+
+                    inside_root = (
+                        os.path.commonpath([
+                            evidence_root,
+                            absolute_path,
+                        ])
+                        == evidence_root
+                    )
+
+                except ValueError:
+
+                    inside_root = False
+
+                if not inside_root:
+
+                    return {
+                        "success": False,
+                        "message":
+                            "Invalid evidence path",
+                    }, 500
+
+                if os.path.isfile(
+                    absolute_path
+                ):
+
+                    try:
+
+                        os.remove(
+                            absolute_path
+                        )
+
+                    except Exception as error:
+
+                        return {
+                            "success": False,
+                            "message":
+                                (
+                                    "Evidence file could "
+                                    f"not be removed: {error}"
+                                ),
+                        }, 500
+
+            database_service.execute(
+                """
+                DELETE FROM evidence
+                WHERE id = ?
+                """,
+                (
+                    row["id"],
+                ),
+            )
+
+            deleted_ids.append(
+                row.get(
+                    "evidence_id"
+                )
+            )
+
+            event_row = (
+                database_service.insert(
+                    """
+                    INSERT INTO events (
+                        event_type,
+                        severity,
+                        details,
+                        vehicle_id,
+                        junction_id,
+                        request_id,
+                        timestamp
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        "EVIDENCE_REMOVED",
+                        "INFO",
+                        (
+                            "Evidence "
+                            f"{row.get('evidence_id')} "
+                            "removed by admin"
+                        ),
+                        row.get(
+                            "vehicle_id"
+                        ),
+                        row.get(
+                            "junction_id"
+                        ),
+                        row.get(
+                            "request_id"
+                        ),
+                        self._now_iso(),
+                    ),
+                )
+            )
+
+            database_service.execute(
+                """
+                UPDATE events
+                SET event_id = ?
+                WHERE id = ?
+                """,
+                (
+                    f"EVT-{event_row:05d}",
+                    event_row,
+                ),
+            )
+
+        return {
+            "success": True,
+            "deleted_count":
+                len(deleted_ids),
+            "deleted_evidence_ids":
+                deleted_ids,
+        }, 200
+
+    def delete_by_request_id(
+        self,
+        request_id,
+    ):
+
+        request_id = str(
+            request_id or ""
+        ).strip()
+
+        if not request_id:
+
+            return {
+                "success": False,
+                "message":
+                    "request_id required",
+            }, 400
+
+        rows = database_service.fetch_all(
+            """
+            SELECT *
+            FROM evidence
+            WHERE request_id = ?
+            ORDER BY id DESC
+            """,
+            (
+                request_id,
+            ),
+        )
+
+        # Zero matches is intentionally successful.
+        # This keeps moderation idempotent and also
+        # supports older Firestore reports that were
+        # created before report/evidence linking existed.
+        return self._delete_rows(
+            rows
+        )
+
+    def delete_by_evidence_id(
+        self,
+        evidence_id,
+    ):
+
+        evidence_id = str(
+            evidence_id or ""
+        ).strip()
+
+        if not evidence_id:
+
+            return {
+                "success": False,
+                "message":
+                    "evidence_id required",
+            }, 400
+
+        rows = database_service.fetch_all(
+            """
+            SELECT *
+            FROM evidence
+            WHERE evidence_id = ?
+            """,
+            (
+                evidence_id,
+            ),
+        )
+
+        return self._delete_rows(
+            rows
+        )
+
+
 evidence_service = EvidenceService()
