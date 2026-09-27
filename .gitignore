@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Firebase secret
+data/firebase-service-account.json
+
+# Runtime database
+data/prioway.db
+data/prioway.db-*
+data/*.db
+data/*.db-*
+
+# Uploaded evidence
+data/evidence/
+
+# Runtime CSV logs
+data/signal_events.csv
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
