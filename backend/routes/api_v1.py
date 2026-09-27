@@ -1054,3 +1054,284 @@ def demo_duplicate_request():
     )
 
     return jsonify(result), code
+
+# =========================================================
+# PHYSICAL CAMERA PREVIEW
+# =========================================================
+
+import os as _camera_os
+import time as _camera_time
+
+from flask import send_file as _camera_send_file
+from services.database_service import (
+    PROJECT_ROOT as _CAMERA_PROJECT_ROOT,
+)
+
+
+_CAMERA_DIR = _camera_os.path.join(
+    _CAMERA_PROJECT_ROOT,
+    "data",
+    "camera",
+)
+
+_camera_os.makedirs(
+    _CAMERA_DIR,
+    exist_ok=True,
+)
+
+
+def _camera_paths(junction_id):
+
+    safe_id = "".join(
+        char
+        for char in junction_id
+        if char.isalnum()
+        or char in {"-", "_"}
+    )
+
+    folder = _camera_os.path.join(
+        _CAMERA_DIR,
+        safe_id,
+    )
+
+    _camera_os.makedirs(
+        folder,
+        exist_ok=True,
+    )
+
+    return (
+        folder,
+        _camera_os.path.join(
+            folder,
+            "latest.jpg",
+        ),
+    )
+
+
+def _camera_upload_authorized():
+
+    expected = _camera_os.getenv(
+        "PRIOWAY_CAMERA_KEY",
+        "",
+    )
+
+    supplied = request.headers.get(
+        "X-PrioWay-Camera-Key",
+        "",
+    )
+
+    return (
+        bool(expected)
+        and supplied == expected
+    )
+
+
+@api_v1.post(
+    "/camera/<junction_id>/frame"
+)
+def camera_frame_upload(
+    junction_id,
+):
+
+    if not _camera_upload_authorized():
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Camera authentication failed",
+        }), 401
+
+    if junction_id != "JNC-001":
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Physical camera not configured",
+        }), 404
+
+    uploaded = (
+        request.files.get("frame")
+        or
+        request.files.get("file")
+    )
+
+    if (
+        uploaded is None
+        or
+        not uploaded.filename
+    ):
+
+        return jsonify({
+            "success": False,
+            "message":
+                "No camera frame supplied",
+        }), 400
+
+    folder, final_path = (
+        _camera_paths(
+            junction_id
+        )
+    )
+
+    temporary_path = (
+        final_path
+        + ".uploading"
+    )
+
+    try:
+
+        uploaded.save(
+            temporary_path
+        )
+
+        _camera_os.replace(
+            temporary_path,
+            final_path,
+        )
+
+    except Exception as error:
+
+        try:
+            if _camera_os.path.exists(
+                temporary_path
+            ):
+                _camera_os.remove(
+                    temporary_path
+                )
+        except Exception:
+            pass
+
+        return jsonify({
+            "success": False,
+            "message":
+                f"Frame save failed: {error}",
+        }), 500
+
+    return jsonify({
+        "success": True,
+        "junction_id":
+            junction_id,
+        "camera_source":
+            "PHYSICAL",
+        "status":
+            "FRAME_UPDATED",
+        "updated_at":
+            _camera_time.time(),
+    })
+
+
+@api_v1.get(
+    "/camera/<junction_id>/frame"
+)
+def camera_frame_get(
+    junction_id,
+):
+
+    if junction_id != "JNC-001":
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Camera not found",
+        }), 404
+
+    _, final_path = (
+        _camera_paths(
+            junction_id
+        )
+    )
+
+    if not _camera_os.path.exists(
+        final_path
+    ):
+
+        return jsonify({
+            "success": False,
+            "message":
+                "No physical camera frame yet",
+        }), 404
+
+    response = _camera_send_file(
+        final_path,
+        mimetype="image/jpeg",
+        conditional=False,
+    )
+
+    response.headers[
+        "Cache-Control"
+    ] = (
+        "no-store, no-cache, "
+        "must-revalidate, max-age=0"
+    )
+
+    return response
+
+
+@api_v1.get(
+    "/camera/<junction_id>/status"
+)
+def camera_status(
+    junction_id,
+):
+
+    if junction_id != "JNC-001":
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Camera not found",
+        }), 404
+
+    _, final_path = (
+        _camera_paths(
+            junction_id
+        )
+    )
+
+    if not _camera_os.path.exists(
+        final_path
+    ):
+
+        return jsonify({
+            "success": True,
+            "junction_id":
+                junction_id,
+            "source":
+                "PHYSICAL",
+            "online":
+                False,
+            "status":
+                "WAITING_FOR_FRAME",
+            "age_seconds":
+                None,
+        })
+
+    modified = (
+        _camera_os.path.getmtime(
+            final_path
+        )
+    )
+
+    age = max(
+        0,
+        _camera_time.time()
+        - modified,
+    )
+
+    return jsonify({
+        "success": True,
+        "junction_id":
+            junction_id,
+        "source":
+            "PHYSICAL",
+        "online":
+            age <= 20,
+        "status":
+            (
+                "ONLINE"
+                if age <= 20
+                else "STALE"
+            ),
+        "age_seconds":
+            round(age, 1),
+    })
