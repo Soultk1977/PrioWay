@@ -1335,3 +1335,118 @@ def camera_status(
         "age_seconds":
             round(age, 1),
     })
+
+
+# =========================================================
+# PRIOWAY EVIDENCE FILE SERVING
+# =========================================================
+
+import mimetypes as _evidence_mimetypes
+import os as _evidence_os
+
+from flask import send_file as _evidence_send_file
+from services.database_service import (
+    PROJECT_ROOT as _EVIDENCE_PROJECT_ROOT,
+)
+
+
+@api_v1.get(
+    "/evidence/<evidence_id>/file"
+)
+def evidence_file(
+    evidence_id,
+):
+
+    item = next(
+        (
+            row
+            for row in evidence_service.list_evidence(250)
+            if row.get("evidence_id") == evidence_id
+        ),
+        None,
+    )
+
+    if item is None:
+
+        return jsonify({
+            "success": False,
+            "message": "Evidence not found",
+        }), 404
+
+    relative_path = item.get(
+        "file_path"
+    )
+
+    if not relative_path:
+
+        return jsonify({
+            "success": False,
+            "message": "Evidence file is unavailable",
+        }), 404
+
+    evidence_root = _evidence_os.path.abspath(
+        _evidence_os.path.join(
+            _EVIDENCE_PROJECT_ROOT,
+            "data",
+            "evidence",
+        )
+    )
+
+    absolute_path = _evidence_os.path.abspath(
+        _evidence_os.path.join(
+            _EVIDENCE_PROJECT_ROOT,
+            relative_path,
+        )
+    )
+
+    try:
+
+        inside_evidence_root = (
+            _evidence_os.path.commonpath([
+                evidence_root,
+                absolute_path,
+            ])
+            == evidence_root
+        )
+
+    except ValueError:
+
+        inside_evidence_root = False
+
+    if not inside_evidence_root:
+
+        return jsonify({
+            "success": False,
+            "message": "Invalid evidence path",
+        }), 403
+
+    if not _evidence_os.path.isfile(
+        absolute_path
+    ):
+
+        return jsonify({
+            "success": False,
+            "message": "Evidence file not found on storage",
+        }), 404
+
+    mimetype = (
+        _evidence_mimetypes.guess_type(
+            absolute_path
+        )[0]
+        or
+        "application/octet-stream"
+    )
+
+    response = _evidence_send_file(
+        absolute_path,
+        mimetype=mimetype,
+        conditional=True,
+        as_attachment=False,
+    )
+
+    response.headers[
+        "Cache-Control"
+    ] = "private, max-age=60"
+
+    return response
+
