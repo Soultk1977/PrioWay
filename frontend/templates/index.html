@@ -2712,6 +2712,67 @@ select option {
 }
 
 
+.camera-media {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    object-fit:
+        cover;
+
+    display:
+        block;
+
+    background:
+        #05070a;
+
+}
+
+
+.camera-view.has-media::before {
+
+    display:
+        none;
+
+}
+
+
+.camera-view.has-media .camera-scan {
+
+    opacity:
+        .42;
+
+    z-index:
+        2;
+
+}
+
+
+.camera-view video.camera-media {
+
+    pointer-events:
+        none;
+
+}
+
+
+.camera-view.camera-offline .camera-media {
+
+    filter:
+        grayscale(1) brightness(.45);
+
+}
+
+
 .camera-view {
 
     height:
@@ -3137,7 +3198,7 @@ select option {
     grid-template-columns:
 
         repeat(
-            4,
+            3,
             minmax(0,1fr)
         );
 
@@ -3168,13 +3229,35 @@ select option {
 }
 
 
+.team-name {
+
+    margin:
+        14px 0 8px;
+
+    font-family:
+        "Arial Black",
+        "Segoe UI",
+        sans-serif;
+
+    font-size:
+        clamp(26px,3vw,40px);
+
+    letter-spacing:
+        -.03em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
 .team-avatar {
 
     width:
-        70px;
+        86px;
 
     height:
-        70px;
+        86px;
 
     display:
         grid;
@@ -3203,6 +3286,51 @@ select option {
     font-family:
         "Arial Black",
         sans-serif;
+
+    overflow:
+        hidden;
+
+}
+
+
+.team-avatar img {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    object-fit:
+        cover;
+
+    display:
+        block;
+
+}
+
+
+.team-avatar span {
+
+    display:
+        none;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    place-items:
+        center;
+
+}
+
+
+.team-avatar.fallback span {
+
+    display:
+        grid;
 
 }
 
@@ -4854,8 +4982,8 @@ select option {
         </h2>
 
         <p>
-            Simulated sources are clearly marked until
-            real camera hardware is connected.
+            JNC-001 uses the physical Raspberry Pi camera.
+            Demo camera sources remain clearly marked SIMULATED.
         </p>
 
     </div>
@@ -5031,6 +5159,10 @@ select option {
     >
 
 
+    <h2 class="team-name">
+        RapidResQ011
+    </h2>
+
     <p>
         Intelligent emergency mobility,
         priority routing and connected
@@ -5050,12 +5182,12 @@ select option {
         </span>
 
         <h2>
-            Project Team
+            RapidResQ011 Team
         </h2>
 
         <p>
-            We will replace the placeholders with your
-            actual team names and roles once you send them.
+            Six contributors across hardware, research, frontend,
+            backend and presentation for the PrioWay prototype.
         </p>
 
     </div>
@@ -5334,66 +5466,62 @@ const APP = {
 };
 
 
-/*
-Replace these later with actual members.
-I have deliberately NOT invented your team names.
-*/
+/* =====================================================
+   RAPIDRESQ011 TEAM
+===================================================== */
 
 const TEAM = [
 
     {
-
-        name:
-            "Team Member 1",
-
-        role:
-            "Project Lead",
-
-        description:
-            "Replace with actual member name and contribution."
-
+        name: "SARTHAK",
+        role: "Leader",
+        description: "Research + Hardware",
+        image: "/static/images/team/sarthak.jpg"
     },
 
     {
-
-        name:
-            "Team Member 2",
-
-        role:
-            "Embedded Systems",
-
-        description:
-            "Replace with actual member name and contribution."
-
+        name: "SHIVAM",
+        role: "Frontend + Presentation",
+        description: "RapidResQ011 • PrioWay",
+        image: "/static/images/team/shivam.jpg"
     },
 
     {
-
-        name:
-            "Team Member 3",
-
-        role:
-            "Software & Backend",
-
-        description:
-            "Replace with actual member name and contribution."
-
+        name: "MANSHI RATHI",
+        role: "Frontend + Presentation",
+        description: "RapidResQ011 • PrioWay",
+        image: "/static/images/team/manshi-rathi.jpg"
     },
 
     {
+        name: "ATHARVA SACHAN",
+        role: "Backend",
+        description: "RapidResQ011 • PrioWay",
+        image: "/static/images/team/atharva-sachan.jpg"
+    },
 
-        name:
-            "Team Member 4",
+    {
+        name: "ATISHAY JAIN",
+        role: "Backend",
+        description: "RapidResQ011 • PrioWay",
+        image: "/static/images/team/atishay-jain.jpg"
+    },
 
-        role:
-            "Mobile / Research",
-
-        description:
-            "Replace with actual member name and contribution."
-
+    {
+        name: "ADARSH KUMAR",
+        role: "PPT + Research",
+        description: "RapidResQ011 • PrioWay",
+        image: "/static/images/team/adarsh-kumar.jpg"
     }
 
 ];
+
+
+const SIMULATED_CAMERA_VIDEOS = {
+    "JNC-SIM-002": "/static/demo/jnc-sim-002.mp4",
+    "JNC-SIM-003": "/static/demo/jnc-sim-003.mp4",
+    "JNC-SIM-004": "/static/demo/jnc-sim-004.mp4"
+};
 
 
 /* =====================================================
@@ -8392,14 +8520,250 @@ async function renderHospitals() {
    CAMERAS
 ===================================================== */
 
+function cameraElementId(prefix, junctionId) {
+
+    return (
+        prefix
+        + "-"
+        + String(junctionId)
+        .replaceAll(/[^A-Za-z0-9_-]/g, "_")
+    );
+
+}
+
+
+function updateCameraMetadata() {
+
+    APP.junctions.forEach(
+        junction => {
+
+            const junctionId =
+                junction.junction_id;
+
+            if (
+                junctionId
+                === "JNC-001"
+            ) {
+                return;
+            }
+
+            const healthStatus =
+                String(
+                    junction.health
+                    ?.status
+                    ||
+                    "ONLINE"
+                )
+                .toUpperCase();
+
+            const cameraStatus =
+                String(
+                    junction.camera
+                    ?.status
+                    ||
+                    "SIMULATED_STREAM"
+                )
+                .toUpperCase();
+
+            const available =
+                ![
+                    "UNAVAILABLE",
+                    "OFFLINE"
+                ]
+                .includes(cameraStatus)
+                &&
+                ![
+                    "OFFLINE",
+                    "FAILED"
+                ]
+                .includes(healthStatus);
+
+            const feedBadge =
+                document.getElementById(
+                    cameraElementId(
+                        "cameraFeedBadge",
+                        junctionId
+                    )
+                );
+
+            const statusText =
+                document.getElementById(
+                    cameraElementId(
+                        "cameraStatusText",
+                        junctionId
+                    )
+                );
+
+            if (feedBadge) {
+
+                feedBadge.className =
+                    "badge "
+                    +
+                    (
+                        available
+                        ? "success"
+                        : "danger"
+                    );
+
+                feedBadge.textContent =
+                    available
+                    ? "FEED ACTIVE"
+                    : "OFFLINE";
+
+            }
+
+            if (statusText) {
+
+                statusText.textContent =
+                    available
+                    ? "SIMULATED_STREAM"
+                    : healthStatus;
+
+            }
+
+        }
+    );
+
+}
+
+
+async function refreshPhysicalCamera() {
+
+    const junctionId =
+        "JNC-001";
+
+    const image =
+        document.getElementById(
+            "physicalCameraFrame"
+        );
+
+    const feedBadge =
+        document.getElementById(
+            "cameraFeedBadge-JNC-001"
+        );
+
+    const statusText =
+        document.getElementById(
+            "cameraStatusText-JNC-001"
+        );
+
+    const view =
+        document.getElementById(
+            "cameraView-JNC-001"
+        );
+
+    if (!image) {
+        return;
+    }
+
+    image.src =
+        API
+        + "/camera/"
+        + junctionId
+        + "/frame?t="
+        + Date.now();
+
+    try {
+
+        const data =
+            await apiGet(
+                API
+                + "/camera/"
+                + junctionId
+                + "/status"
+            );
+
+        const online =
+            Boolean(
+                data.online
+            );
+
+        if (feedBadge) {
+
+            feedBadge.className =
+                "badge "
+                +
+                (
+                    online
+                    ? "success"
+                    : "warning"
+                );
+
+            feedBadge.textContent =
+                online
+                ? "CAMERA ONLINE"
+                : "CAMERA STALE";
+
+        }
+
+        if (statusText) {
+
+            statusText.textContent =
+                online
+                ? "PHYSICAL LIVE SNAPSHOT"
+                : "WAITING FOR FRESH FRAME";
+
+        }
+
+        if (view) {
+
+            view.classList.toggle(
+                "camera-offline",
+                !online
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        if (feedBadge) {
+            feedBadge.className =
+                "badge danger";
+            feedBadge.textContent =
+                "CAMERA OFFLINE";
+        }
+
+        if (statusText) {
+            statusText.textContent =
+                "PHYSICAL CAMERA UNREACHABLE";
+        }
+
+        if (view) {
+            view.classList.add(
+                "camera-offline"
+            );
+        }
+
+    }
+
+}
+
+
 function renderCameras() {
 
-    document
-    .getElementById(
-        "cameraGrid"
-    )
-    .innerHTML =
+    const grid =
+        document.getElementById(
+            "cameraGrid"
+        );
 
+    /*
+    Do not rebuild the camera DOM every five seconds.
+    Rebuilding would restart all simulated videos.
+    */
+    if (
+        grid.dataset.rendered
+        === "1"
+    ) {
+
+        updateCameraMetadata();
+        refreshPhysicalCamera();
+        return;
+
+    }
+
+    grid.innerHTML =
         APP.junctions
         .map(
             (
@@ -8407,119 +8771,142 @@ function renderCameras() {
                 index
             ) => {
 
-                const available =
+                const junctionId =
+                    junction.junction_id;
 
-                    ![
-                        "UNAVAILABLE",
-                        "OFFLINE"
-                    ]
-                    .includes(
-                        String(
-                            junction.camera
-                            ?.status
-                            ||
-                            ""
-                        )
-                        .toUpperCase()
-                    );
+                const isPhysical =
+                    junctionId
+                    === "JNC-001";
 
+                const videoPath =
+                    SIMULATED_CAMERA_VIDEOS[
+                        junctionId
+                    ];
+
+                const isSimulated =
+                    Boolean(videoPath);
 
                 const traffic =
-
-                    !available
-
-                    ? "NO FEED"
-
+                    isPhysical
+                    ? "LIVE"
                     :
                     (
                         index % 3 === 0
-
                         ? "LOW"
-
                         :
                         (
                             index % 3 === 1
-
                             ? "MODERATE"
-
                             : "HIGH"
                         )
                     );
 
-
                 const vehicles =
-
-                    available
-
-                    ?
+                    isPhysical
+                    ? "—"
+                    :
                     (
                         6
-                        +
-                        index * 5
-                        +
-                        Number(
+                        + index * 5
+                        + Number(
                             junction.current_light
-                            ||
-                            0
+                            || 0
                         )
-                    )
+                    );
 
+                const media =
+                    isPhysical
+                    ? `
+                        <img
+                            class="camera-media"
+                            id="physicalCameraFrame"
+                            src="${API}/camera/JNC-001/frame?t=${Date.now()}"
+                            alt="Physical JNC-001 camera snapshot"
+                        >
+                    `
                     :
-                    0;
+                    (
+                        isSimulated
+                        ? `
+                            <video
+                                class="camera-media"
+                                autoplay
+                                muted
+                                loop
+                                playsinline
+                                preload="metadata"
+                                src="${videoPath}"
+                            ></video>
+                        `
+                        : ""
+                    );
 
+                const feedLabel =
+                    isPhysical
+                    ? "CHECKING CAMERA"
+                    : "FEED ACTIVE";
+
+                const feedStyle =
+                    isPhysical
+                    ? "warning"
+                    : "success";
+
+                const source =
+                    isPhysical
+                    ? "PHYSICAL"
+                    : "SIMULATED";
+
+                const analysis =
+                    isPhysical
+                    ? "PHYSICAL"
+                    : "SIMULATED";
+
+                const status =
+                    isPhysical
+                    ? "CHECKING PHYSICAL CAMERA"
+                    : "SIMULATED_STREAM";
 
                 return `
 
                 <article class="camera-card">
 
+                    <div
+                        class="camera-view has-media"
+                        id="cameraView-${escapeHTML(junctionId)}"
+                    >
 
-                    <div class="camera-view">
+                        ${media}
 
                         <div class="camera-scan"></div>
-
 
                         <div class="camera-top">
 
                             ${
                                 badge(
-                                    junction.junction_id,
+                                    junctionId,
                                     "neutral"
                                 )
                             }
 
-                            ${
-                                badge(
-                                    available
-                                    ? "FEED ACTIVE"
-                                    : "UNAVAILABLE",
-                                    available
-                                    ? "success"
-                                    : "danger"
-                                )
-                            }
+                            <span
+                                class="badge ${feedStyle}"
+                                id="${cameraElementId(
+                                    "cameraFeedBadge",
+                                    junctionId
+                                )}"
+                            >
+                                ${feedLabel}
+                            </span>
 
                         </div>
-
 
                         <div class="camera-bottom">
-
-                            ${
-                                sourceBadge(
-                                    junction.camera
-                                    ?.source
-                                    ||
-                                    junction.source
-                                )
-                            }
-
+                            ${sourceBadge(source)}
                         </div>
-
 
                     </div>
 
-
                     <div class="camera-body">
-
 
                         <div class="entity-head">
 
@@ -8531,79 +8918,46 @@ function renderCameras() {
                                     )}
                                 </h3>
 
-                                <div class="entity-sub">
-                                    ${escapeHTML(
-                                        junction.camera
-                                        ?.status
-                                        ||
-                                        "UNAVAILABLE"
-                                    )}
+                                <div
+                                    class="entity-sub"
+                                    id="${cameraElementId(
+                                        "cameraStatusText",
+                                        junctionId
+                                    )}"
+                                >
+                                    ${status}
                                 </div>
 
                             </div>
 
                         </div>
 
-
                         <div class="analysis-grid">
 
                             <div>
-
-                                <small>
-                                    Traffic
-                                </small>
-
+                                <small>Traffic</small>
                                 <strong>
-                                    ${escapeHTML(
-                                        traffic
-                                    )}
+                                    ${escapeHTML(traffic)}
                                 </strong>
-
                             </div>
 
-
                             <div>
-
-                                <small>
-                                    Vehicles
-                                </small>
-
+                                <small>Vehicles</small>
                                 <strong>
                                     ${vehicles}
                                 </strong>
-
                             </div>
 
-
                             <div>
-
-                                <small>
-                                    Analysis
-                                </small>
-
+                                <small>Analysis</small>
                                 <strong>
-
-                                    ${
-                                        junction.camera
-                                        ?.source
-                                        === "SIMULATED"
-
-                                        ?
-                                        "SIMULATED"
-
-                                        :
-                                        "WAITING REAL FEED"
-                                    }
-
+                                    ${analysis}
                                 </strong>
-
                             </div>
 
                         </div>
 
-
                     </div>
-
 
                 </article>
 
@@ -8612,6 +8966,12 @@ function renderCameras() {
             }
         )
         .join("");
+
+    grid.dataset.rendered =
+        "1";
+
+    updateCameraMetadata();
+    refreshPhysicalCamera();
 
 }
 
@@ -8825,38 +9185,62 @@ function renderTeam() {
 
         TEAM
         .map(
-            (
-                member,
-                index
-            ) => `
+            member => {
 
-            <article class="team-card">
+                const initials =
+                    member.name
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .map(
+                        part =>
+                            part[0]
+                    )
+                    .join("")
+                    .slice(0,2)
+                    .toUpperCase();
 
-                <div class="team-avatar">
-                    P${index + 1}
-                </div>
+                return `
 
-                <h3>
-                    ${escapeHTML(
-                        member.name
-                    )}
-                </h3>
+                <article class="team-card">
 
-                <div class="team-role">
-                    ${escapeHTML(
-                        member.role
-                    )}
-                </div>
+                    <div class="team-avatar">
 
-                <div class="team-description">
-                    ${escapeHTML(
-                        member.description
-                    )}
-                </div>
+                        <img
+                            src="${escapeHTML(member.image)}"
+                            alt="${escapeHTML(member.name)}"
+                            loading="lazy"
+                            onerror="this.style.display='none';this.parentElement.classList.add('fallback');"
+                        >
 
-            </article>
+                        <span>
+                            ${escapeHTML(initials)}
+                        </span>
 
-            `
+                    </div>
+
+                    <h3>
+                        ${escapeHTML(
+                            member.name
+                        )}
+                    </h3>
+
+                    <div class="team-role">
+                        ${escapeHTML(
+                            member.role
+                        )}
+                    </div>
+
+                    <div class="team-description">
+                        ${escapeHTML(
+                            member.description
+                        )}
+                    </div>
+
+                </article>
+
+                `;
+
+            }
         )
         .join("");
 
