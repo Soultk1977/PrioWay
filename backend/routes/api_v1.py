@@ -1,8 +1,12 @@
+import os
+
 from flask import (
     Blueprint,
     jsonify,
     request,
 )
+
+from firebase_admin import auth as firebase_auth
 
 from services.state_manager import state_manager
 from services.prioway_store import prioway_store
@@ -11,6 +15,9 @@ from services.routing_service import routing_service
 from services.verification_service import verification_service
 from services.evidence_service import evidence_service
 from services.demo_service import demo_service
+from services.nearby_notification_service import (
+    nearby_notification_service,
+)
 
 
 api_v1 = Blueprint(
@@ -60,6 +67,23 @@ def refresh_prioway_data():
             )
         except Exception:
             pass
+
+    # When the physical corridor actually becomes ACTIVE,
+    # notify only recently located phones near JNC-001.
+    # Any notification problem must never break core traffic
+    # control or the status endpoint.
+    try:
+
+        nearby_notification_service.handle_snapshot(
+            snapshot
+        )
+
+    except Exception as error:
+
+        print(
+            "Nearby corridor notification error:",
+            error,
+        )
 
     return snapshot
 
@@ -825,6 +849,116 @@ def route():
 
 
 # =========================================================
+# FIREBASE USER / ADMIN AUTH
+# =========================================================
+
+def _verified_firebase_user(
+    require_admin=False,
+):
+
+    authorization = str(
+        request.headers.get(
+            "Authorization",
+            "",
+        )
+    ).strip()
+
+    if not authorization.startswith(
+        "Bearer "
+    ):
+
+        return None, (
+            jsonify({
+                "success": False,
+                "message":
+                    "Firebase authentication required",
+            }),
+            401,
+        )
+
+    token = authorization[
+        len("Bearer "):
+    ].strip()
+
+    if not token:
+
+        return None, (
+            jsonify({
+                "success": False,
+                "message":
+                    "Firebase authentication required",
+            }),
+            401,
+        )
+
+    try:
+
+        decoded = (
+            firebase_auth.verify_id_token(
+                token
+            )
+        )
+
+    except Exception as error:
+
+        return None, (
+            jsonify({
+                "success": False,
+                "message":
+                    "Invalid Firebase authentication",
+                "error":
+                    str(error),
+            }),
+            401,
+        )
+
+    if require_admin:
+
+        admin_email = (
+            os.getenv(
+                "PRIOWAY_ADMIN_EMAIL",
+                "",
+            )
+            .strip()
+            .lower()
+        )
+
+        if not admin_email:
+
+            return None, (
+                jsonify({
+                    "success": False,
+                    "message":
+                        (
+                            "PRIOWAY_ADMIN_EMAIL "
+                            "is not configured"
+                        ),
+                }),
+                503,
+            )
+
+        token_email = str(
+            decoded.get(
+                "email",
+                "",
+            )
+        ).strip().lower()
+
+        if token_email != admin_email:
+
+            return None, (
+                jsonify({
+                    "success": False,
+                    "message":
+                        "Admin permission required",
+                }),
+                403,
+            )
+
+    return decoded, None
+
+
+# =========================================================
 # EVIDENCE / PHOTO / VIDEO
 # =========================================================
 
@@ -936,6 +1070,166 @@ def register_mobile_device():
                 "platform",
                 "android",
             ),
+        )
+    )
+
+    return jsonify(result), code
+
+
+# =========================================================
+# NEARBY NOTIFICATION STATUS
+# =========================================================
+
+@api_v1.get(
+    "/notifications/nearby/status"
+)
+def nearby_notification_status():
+
+    try:
+
+        result = (
+            nearby_notification_service
+            .status()
+        )
+
+        return jsonify(
+            result
+        )
+
+    except Exception as error:
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Nearby notification status failed",
+            "error":
+                str(error),
+        }), 500
+
+
+# =========================================================
+# MOBILE DEVICE LOCATION
+# =========================================================
+
+@api_v1.post(
+    "/devices/location"
+)
+def update_mobile_device_location():
+
+    decoded, auth_error = (
+        _verified_firebase_user(
+            require_admin=False
+        )
+    )
+
+    if auth_error:
+        return auth_error
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    token_uid = str(
+        decoded.get(
+            "uid",
+            "",
+        )
+    )
+
+    supplied_uid = str(
+        data.get(
+            "user_id",
+            "",
+        )
+    )
+
+    if (
+        not token_uid
+        or
+        supplied_uid != token_uid
+    ):
+
+        return jsonify({
+            "success": False,
+            "message":
+                "User identity mismatch",
+        }), 403
+
+    result, code = (
+        evidence_service
+        .update_app_device_location(
+            user_id=token_uid,
+            device_token=data.get(
+                "device_token"
+            ),
+            lat=data.get(
+                "lat"
+            ),
+            lon=data.get(
+                "lon"
+            ),
+            accuracy_m=data.get(
+                "accuracy_m"
+            ),
+        )
+    )
+
+    return jsonify(result), code
+
+
+# =========================================================
+# AUTHENTICATED ADMIN EVIDENCE REMOVAL
+# =========================================================
+
+@api_v1.delete(
+    "/admin/evidence/by-request/<request_id>"
+)
+def admin_delete_evidence_by_request(
+    request_id,
+):
+
+    _, auth_error = (
+        _verified_firebase_user(
+            require_admin=True
+        )
+    )
+
+    if auth_error:
+        return auth_error
+
+    result, code = (
+        evidence_service
+        .delete_by_request_id(
+            request_id
+        )
+    )
+
+    return jsonify(result), code
+
+
+@api_v1.delete(
+    "/admin/evidence/<evidence_id>"
+)
+def admin_delete_evidence(
+    evidence_id,
+):
+
+    _, auth_error = (
+        _verified_firebase_user(
+            require_admin=True
+        )
+    )
+
+    if auth_error:
+        return auth_error
+
+    result, code = (
+        evidence_service
+        .delete_by_evidence_id(
+            evidence_id
         )
     )
 
