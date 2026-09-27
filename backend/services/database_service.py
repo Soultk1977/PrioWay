@@ -169,14 +169,68 @@ class DatabaseService:
                         device_token TEXT UNIQUE,
                         platform TEXT,
                         enabled INTEGER NOT NULL DEFAULT 1,
+                        lat REAL,
+                        lon REAL,
+                        location_accuracy_m REAL,
+                        location_updated_at TEXT,
                         created_at TEXT NOT NULL,
+                        updated_at TEXT NOT NULL
+                    );
+
+                    CREATE TABLE IF NOT EXISTS notification_state (
+                        key TEXT PRIMARY KEY,
+                        value TEXT,
                         updated_at TEXT NOT NULL
                     );
                     """
                 )
 
+                # Existing Railway databases already have app_devices,
+                # so add the new location columns safely when missing.
+                self._ensure_column(
+                    connection,
+                    "app_devices",
+                    "lat",
+                    "REAL",
+                )
+                self._ensure_column(
+                    connection,
+                    "app_devices",
+                    "lon",
+                    "REAL",
+                )
+                self._ensure_column(
+                    connection,
+                    "app_devices",
+                    "location_accuracy_m",
+                    "REAL",
+                )
+                self._ensure_column(
+                    connection,
+                    "app_devices",
+                    "location_updated_at",
+                    "TEXT",
+                )
+
                 self._seed_database(
                     connection
+                )
+
+                # Remove only the old demonstration coordinates from
+                # existing persistent Railway databases. Future real
+                # JNC-001 coordinates, if added from an actual source,
+                # are preserved.
+                connection.execute(
+                    """
+                    UPDATE junctions
+                    SET
+                        lat = NULL,
+                        lon = NULL
+                    WHERE
+                        junction_id = 'JNC-001'
+                        AND ABS(lat - 28.7370) < 0.000001
+                        AND ABS(lon - 77.1120) < 0.000001
+                    """
                 )
 
                 connection.commit()
@@ -184,6 +238,34 @@ class DatabaseService:
             finally:
 
                 connection.close()
+
+    # =====================================================
+    # SAFE SCHEMA MIGRATION
+    # =====================================================
+
+    def _ensure_column(
+        self,
+        connection,
+        table_name,
+        column_name,
+        column_type,
+    ):
+
+        rows = connection.execute(
+            f"PRAGMA table_info({table_name})"
+        ).fetchall()
+
+        existing = {
+            row["name"]
+            for row in rows
+        }
+
+        if column_name not in existing:
+
+            connection.execute(
+                f"ALTER TABLE {table_name} "
+                f"ADD COLUMN {column_name} {column_type}"
+            )
 
     # =====================================================
     # SEED DATA
@@ -247,8 +329,8 @@ class DatabaseService:
                 "JNC-001",
                 "Physical Junction 1",
                 "PHYSICAL",
-                28.7370,
-                77.1120,
+                None,
+                None,
                 "PHYSICAL",
                 "UNAVAILABLE",
                 "UNAVAILABLE",
