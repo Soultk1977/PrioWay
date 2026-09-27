@@ -6195,10 +6195,10 @@ const overviewMap =
     )
     .setView(
         [
-            28.68,
-            77.17
+            20,
+            0
         ],
-        11
+        2
     );
 
 
@@ -6208,10 +6208,10 @@ const mainMap =
     )
     .setView(
         [
-            28.68,
-            77.17
+            20,
+            0
         ],
-        11
+        2
     );
 
 
@@ -6476,6 +6476,9 @@ function renderMarkers() {
     }
 
 
+    let livePhysicalVehicleLocation = null;
+
+
     APP.vehicles
     .forEach(
         vehicle => {
@@ -6484,6 +6487,26 @@ function renderMarkers() {
                 vehicle.location
                 ||
                 {};
+
+
+            if (
+                vehicle.vehicle_id
+                ===
+                "VEH-001"
+                &&
+                location.valid
+            ) {
+
+                livePhysicalVehicleLocation = {
+                    lat: Number(
+                        location.lat
+                    ),
+                    lon: Number(
+                        location.lon
+                    )
+                };
+
+            }
 
 
             if (
@@ -6674,17 +6697,35 @@ function renderMarkers() {
             !APP.route
         ) {
 
-            mainMap
-            .fitBounds(
-                bounds,
-                {
-                    padding:
-                        [45,45],
+            if (
+                livePhysicalVehicleLocation
+            ) {
 
-                    maxZoom:
-                        12
-                }
-            );
+                mainMap
+                .setView(
+                    [
+                        livePhysicalVehicleLocation.lat,
+                        livePhysicalVehicleLocation.lon
+                    ],
+                    14
+                );
+
+            }
+            else {
+
+                mainMap
+                .fitBounds(
+                    bounds,
+                    {
+                        padding:
+                            [45,45],
+
+                        maxZoom:
+                            12
+                    }
+                );
+
+            }
 
         }
 
@@ -7925,15 +7966,35 @@ function renderJunctions() {
 
                             <strong>
 
-                                ${Number(
-                                    junction.lat
-                                ).toFixed(3)}
-
-                                ,
-
-                                ${Number(
-                                    junction.lon
-                                ).toFixed(3)}
+                                ${
+                                    (
+                                        junction.lat
+                                        !== null
+                                        &&
+                                        junction.lat
+                                        !== undefined
+                                        &&
+                                        junction.lon
+                                        !== null
+                                        &&
+                                        junction.lon
+                                        !== undefined
+                                    )
+                                    ?
+                                    (
+                                        Number(
+                                            junction.lat
+                                        ).toFixed(3)
+                                        +
+                                        ", "
+                                        +
+                                        Number(
+                                            junction.lon
+                                        ).toFixed(3)
+                                    )
+                                    :
+                                    "NOT REPORTED"
+                                }
 
                             </strong>
 
