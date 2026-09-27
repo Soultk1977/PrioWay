@@ -4011,6 +4011,53 @@ select option {
 
 }
 
+
+/* =====================================================
+   EVIDENCE MEDIA
+===================================================== */
+
+.evidence-preview.has-media {
+    display: block;
+    padding: 0;
+    background: #05070a;
+}
+
+.evidence-preview img,
+.evidence-preview video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    background: #05070a;
+}
+
+.evidence-preview video {
+    cursor: pointer;
+}
+
+.evidence-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.evidence-open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    margin-top: 10px;
+    padding: 0 11px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    color: white;
+    background: rgba(255,255,255,.04);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 900;
+}
+
 </style>
 
 </head>
@@ -8987,7 +9034,6 @@ function renderEvidence() {
             "evidenceGrid"
         );
 
-
     if (
         !APP.evidence.length
     ) {
@@ -9004,75 +9050,149 @@ function renderEvidence() {
 
     }
 
-
     grid.innerHTML =
 
         APP.evidence
         .map(
-            evidence => `
+            evidence => {
 
-            <article class="evidence-card">
-
-                <div class="evidence-preview">
-
-                    ${escapeHTML(
+                const type =
+                    String(
                         evidence.evidence_type
                         ||
                         "EVIDENCE"
-                    )}
+                    )
+                    .toUpperCase();
 
-                </div>
+                const evidenceId =
+                    String(
+                        evidence.evidence_id
+                        ||
+                        ""
+                    );
 
+                const fileUrl =
+                    evidenceId
+                    ?
+                    `${API}/evidence/${encodeURIComponent(evidenceId)}/file`
+                    :
+                    "";
 
-                <div class="evidence-body">
+                let preview =
+                    `<div class="evidence-preview">${escapeHTML(type)}</div>`;
 
-                    <h3>
-                        ${escapeHTML(
-                            evidence.evidence_id
-                            ||
-                            "Evidence"
-                        )}
-                    </h3>
+                if (
+                    type === "VIDEO"
+                    &&
+                    fileUrl
+                ) {
 
-                    <p>
-                        ${escapeHTML(
-                            evidence.description
-                            ||
-                            "No description"
-                        )}
-                    </p>
+                    preview = `
+                    <div class="evidence-preview has-media">
+                        <video
+                            controls
+                            playsinline
+                            preload="metadata"
+                            src="${fileUrl}"
+                        ></video>
+                    </div>
+                    `;
 
-                    <p>
+                } else if (
+                    [
+                        "PHOTO",
+                        "IMAGE"
+                    ]
+                    .includes(type)
+                    &&
+                    fileUrl
+                ) {
 
-                        ${escapeHTML(
-                            evidence.vehicle_id
-                            ||
-                            "—"
-                        )}
+                    preview = `
+                    <div class="evidence-preview has-media">
+                        <img
+                            src="${fileUrl}"
+                            alt="${escapeHTML(evidenceId || "Evidence")}" 
+                            loading="lazy"
+                        >
+                    </div>
+                    `;
 
-                        ·
+                }
 
-                        ${escapeHTML(
-                            evidence.junction_id
-                            ||
-                            "—"
-                        )}
+                return `
 
-                    </p>
+                <article class="evidence-card">
 
-                    <p>
-                        ${escapeHTML(
-                            formatDate(
-                                evidence.created_at
-                            )
-                        )}
-                    </p>
+                    ${preview}
 
-                </div>
+                    <div class="evidence-body">
 
-            </article>
+                        <h3>
+                            ${escapeHTML(
+                                evidenceId
+                                ||
+                                "Evidence"
+                            )}
+                        </h3>
 
-            `
+                        <p>
+                            ${escapeHTML(
+                                evidence.description
+                                ||
+                                "No description"
+                            )}
+                        </p>
+
+                        <p>
+                            ${escapeHTML(
+                                evidence.vehicle_id
+                                ||
+                                "—"
+                            )}
+                            ·
+                            ${escapeHTML(
+                                evidence.junction_id
+                                ||
+                                "—"
+                            )}
+                        </p>
+
+                        <p>
+                            ${escapeHTML(
+                                formatDate(
+                                    evidence.created_at
+                                )
+                            )}
+                        </p>
+
+                        <div class="evidence-meta-row">
+                            ${badge(type, type === "VIDEO" ? "info" : "neutral")}
+                            ${sourceBadge(evidence.source || "UNKNOWN")}
+                        </div>
+
+                        ${
+                            fileUrl
+                            ?
+                            `<a
+                                class="evidence-open"
+                                href="${fileUrl}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                OPEN ORIGINAL
+                            </a>`
+                            :
+                            ""
+                        }
+
+                    </div>
+
+                </article>
+
+                `;
+
+            }
         )
         .join("");
 
