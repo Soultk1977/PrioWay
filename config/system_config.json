@@ -1,0 +1,23 @@
+{
+    "project": {
+        "name": "ResQSync",
+        "mode": "localhost"
+    },
+    "approval": {
+        "automatic_approval": false
+    },
+    "raspberry_pi": {
+        "serial_port": "/dev/serial0",
+        "baud_rate": 115200
+    },
+    "logging": {
+        "signal_events_csv": "data/signal_events.csv"
+    },
+    "states": [
+        "NORMAL",
+        "EMERGENCY_PENDING",
+        "ACTIVE_CORRIDOR",
+        "RESETTING",
+        "FAULT"
+    ]
+}
