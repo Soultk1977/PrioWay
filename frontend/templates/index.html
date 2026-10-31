@@ -3133,251 +3133,6 @@ select option {
 
 
 /* =====================================================
-   TEAM
-===================================================== */
-
-.team-hero {
-
-    min-height:
-        250px;
-
-    display:
-        grid;
-
-    place-items:
-        center;
-
-    text-align:
-        center;
-
-    padding:
-        26px;
-
-    margin-bottom:
-        28px;
-
-    border-radius:
-        var(--radius);
-
-}
-
-
-.team-logo {
-
-    width:
-        min(650px,90%);
-
-    max-height:
-        150px;
-
-    object-fit:
-        contain;
-
-}
-
-
-.team-hero p {
-
-    margin:
-        0;
-
-    max-width:
-        650px;
-
-    color:
-        var(--muted);
-
-}
-
-
-.team-grid {
-
-    display:
-        grid;
-
-    grid-template-columns:
-
-        repeat(
-            3,
-            minmax(0,1fr)
-        );
-
-    gap:
-        16px;
-
-}
-
-
-.team-card {
-
-    padding:
-        18px;
-
-    text-align:
-        center;
-
-    border:
-        1px solid
-        var(--line);
-
-    border-radius:
-        18px;
-
-    background:
-        rgba(16,20,28,.72);
-
-}
-
-
-.team-name {
-
-    margin:
-        14px 0 8px;
-
-    font-family:
-        "Arial Black",
-        "Segoe UI",
-        sans-serif;
-
-    font-size:
-        clamp(26px,3vw,40px);
-
-    letter-spacing:
-        -.03em;
-
-    text-transform:
-        uppercase;
-
-}
-
-
-.team-avatar {
-
-    width:
-        86px;
-
-    height:
-        86px;
-
-    display:
-        grid;
-
-    place-items:
-        center;
-
-    margin:
-        auto auto 13px;
-
-    border:
-        1px solid
-        var(--line);
-
-    border-radius:
-        18px;
-
-    background:
-
-        linear-gradient(
-            135deg,
-            rgba(255,255,255,.08),
-            rgba(239,29,40,.16)
-        );
-
-    font-family:
-        "Arial Black",
-        sans-serif;
-
-    overflow:
-        hidden;
-
-}
-
-
-.team-avatar img {
-
-    width:
-        100%;
-
-    height:
-        100%;
-
-    object-fit:
-        cover;
-
-    display:
-        block;
-
-}
-
-
-.team-avatar span {
-
-    display:
-        none;
-
-    width:
-        100%;
-
-    height:
-        100%;
-
-    place-items:
-        center;
-
-}
-
-
-.team-avatar.fallback span {
-
-    display:
-        grid;
-
-}
-
-
-.team-card h3 {
-
-    margin:
-        0;
-
-}
-
-
-.team-role {
-
-    margin-top:
-        4px;
-
-    color:
-        var(--red);
-
-    font-size:
-        11px;
-
-    font-weight:
-        900;
-
-}
-
-
-.team-description {
-
-    margin-top:
-        10px;
-
-    color:
-        var(--muted);
-
-    font-size:
-        11px;
-
-    line-height:
-        1.45;
-
-}
-
-
-/* =====================================================
    DEMO DRAWER
 ===================================================== */
 
@@ -3823,16 +3578,7 @@ select option {
 
     }
 
-
-    .team-grid {
-
-        grid-template-columns:
-            repeat(2,1fr);
-
-    }
-
-
-    .evidence-grid {
+.evidence-grid {
 
         grid-template-columns:
             repeat(3,1fr);
@@ -3985,7 +3731,6 @@ select option {
 
     .overview-side,
     .card-grid,
-    .team-grid,
     .evidence-grid {
 
         grid-template-columns:
@@ -4198,23 +3943,7 @@ select option {
             <span class="nav-icon">≡</span>
             Events
         </button>
-
-
-        <div class="nav-title">
-            Project
-        </div>
-
-
-        <button
-            class="nav-item"
-            data-page="team"
-        >
-            <span class="nav-icon">P</span>
-            Team
-        </button>
-
-
-    </nav>
+</nav>
 
 
     <div class="sidebar-footer glass">
@@ -5184,73 +4913,6 @@ select option {
 
 
 </section>
-
-
-<!-- =====================================================
-     TEAM
-===================================================== -->
-
-<section
-    class="page"
-    data-panel="team"
->
-
-
-<div class="team-hero glass">
-
-
-    <img
-        class="team-logo"
-        src="/static/images/prioway-logo.png"
-        alt="PrioWay"
-    >
-
-
-    <h2 class="team-name">
-        RapidResQ011
-    </h2>
-
-    <p>
-        Intelligent emergency mobility,
-        priority routing and connected
-        junction awareness.
-    </p>
-
-
-</div>
-
-
-<div class="section-heading">
-
-    <div>
-
-        <span class="eyebrow">
-            THE PEOPLE BEHIND PRIOWAY
-        </span>
-
-        <h2>
-            RapidResQ011 Team
-        </h2>
-
-        <p>
-            Six contributors across hardware, research, frontend,
-            backend and presentation for the PrioWay prototype.
-        </p>
-
-    </div>
-
-</div>
-
-
-<div
-    class="team-grid"
-    id="teamGrid"
-></div>
-
-
-</section>
-
-
 </main>
 
 
@@ -5476,12 +5138,7 @@ const PAGE_NAMES = {
         "Evidence",
 
     events:
-        "Events",
-
-    team:
-        "Team"
-
-};
+        "Events"};
 
 
 const APP = {
@@ -5511,57 +5168,6 @@ const APP = {
         null
 
 };
-
-
-/* =====================================================
-   RAPIDRESQ011 TEAM
-===================================================== */
-
-const TEAM = [
-
-    {
-        name: "SARTHAK",
-        role: "Leader",
-        description: "Research + Hardware",
-        image: "/static/images/team/sarthak.jpg"
-    },
-
-    {
-        name: "SHIVAM",
-        role: "Frontend + Presentation",
-        description: "RapidResQ011 • PrioWay",
-        image: "/static/images/team/shivam.jpg"
-    },
-
-    {
-        name: "MANSHI RATHI",
-        role: "Frontend + Presentation",
-        description: "RapidResQ011 • PrioWay",
-        image: "/static/images/team/manshi-rathi.jpg"
-    },
-
-    {
-        name: "ATHARVA SACHAN",
-        role: "Backend",
-        description: "RapidResQ011 • PrioWay",
-        image: "/static/images/team/atharva-sachan.jpg"
-    },
-
-    {
-        name: "ATISHAY JAIN",
-        role: "Backend",
-        description: "RapidResQ011 • PrioWay",
-        image: "/static/images/team/atishay-jain.jpg"
-    },
-
-    {
-        name: "ADARSH KUMAR",
-        role: "PPT + Research",
-        description: "RapidResQ011 • PrioWay",
-        image: "/static/images/team/adarsh-kumar.jpg"
-    }
-
-];
 
 
 const SIMULATED_CAMERA_VIDEOS = {
@@ -9353,82 +8959,6 @@ function renderEvents() {
 
 
 /* =====================================================
-   TEAM
-===================================================== */
-
-function renderTeam() {
-
-    document
-    .getElementById(
-        "teamGrid"
-    )
-    .innerHTML =
-
-        TEAM
-        .map(
-            member => {
-
-                const initials =
-                    member.name
-                    .split(/\s+/)
-                    .filter(Boolean)
-                    .map(
-                        part =>
-                            part[0]
-                    )
-                    .join("")
-                    .slice(0,2)
-                    .toUpperCase();
-
-                return `
-
-                <article class="team-card">
-
-                    <div class="team-avatar">
-
-                        <img
-                            src="${escapeHTML(member.image)}"
-                            alt="${escapeHTML(member.name)}"
-                            loading="lazy"
-                            onerror="this.style.display='none';this.parentElement.classList.add('fallback');"
-                        >
-
-                        <span>
-                            ${escapeHTML(initials)}
-                        </span>
-
-                    </div>
-
-                    <h3>
-                        ${escapeHTML(
-                            member.name
-                        )}
-                    </h3>
-
-                    <div class="team-role">
-                        ${escapeHTML(
-                            member.role
-                        )}
-                    </div>
-
-                    <div class="team-description">
-                        ${escapeHTML(
-                            member.description
-                        )}
-                    </div>
-
-                </article>
-
-                `;
-
-            }
-        )
-        .join("");
-
-}
-
-
-/* =====================================================
    ROUTING
 ===================================================== */
 
@@ -10615,7 +10145,6 @@ document
 );
 
 
-renderTeam();
 
 updateStartVisibility();
 
